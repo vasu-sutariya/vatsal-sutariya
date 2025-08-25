@@ -95,6 +95,7 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 4rem;
     align-items: center;
+    position: relative;
 }
 
 .hero-title {
@@ -463,5 +464,204 @@ section {
     .btn {
         padding: 10px 20px;
         font-size: 0.9rem;
+    }
+}
+
+/* Rover Styles */
+.hero-rover {
+    position: absolute;
+    top: 50%;
+    right: 10%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+.rover {
+    width: 80px;
+    height: 60px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.rover:hover {
+    transform: scale(1.1);
+}
+
+.rover-body {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(145deg, #4a5568, #2d3748);
+    border-radius: 15px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border: 2px solid #718096;
+}
+
+.rover-head {
+    width: 50px;
+    height: 30px;
+    background: #2d3748;
+    border-radius: 10px;
+    position: absolute;
+    top: -15px;
+    left: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 5px;
+}
+
+.rover-eye {
+    width: 8px;
+    height: 8px;
+    background: #00ff88;
+    border-radius: 50%;
+    animation: blink 3s infinite;
+}
+
+@keyframes blink {
+    0%, 90%, 100% { opacity: 1; }
+    95% { opacity: 0.3; }
+}
+
+.rover-mouth {
+    width: 12px;
+    height: 4px;
+    background: #ff6b6b;
+    border-radius: 2px;
+    margin-top: 2px;
+}
+
+.rover-wheels {
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 5px;
+}
+
+.wheel {
+    width: 20px;
+    height: 20px;
+    background: #1a202c;
+    border-radius: 50%;
+    border: 3px solid #4a5568;
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.rover-antenna {
+    width: 3px;
+    height: 15px;
+    background: #718096;
+    position: absolute;
+    top: -20px;
+    right: 10px;
+    border-radius: 2px;
+}
+
+.rover-antenna::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #00ff88;
+    border-radius: 50%;
+    position: absolute;
+    top: -3px;
+    left: -1.5px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+.rover-speech-bubble {
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 20;
+}
+
+.rover-speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid white;
+}
+
+.rover-speech-bubble.show {
+    opacity: 1;
+}
+
+/* Rover following mouse styles */
+.rover.following {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1001;
+    transition: none;
+}
+
+.rover.following .rover-speech-bubble {
+    display: none;
+}
+
+/* Responsive rover */
+@media (max-width: 768px) {
+    .hero-rover {
+        position: relative;
+        top: auto;
+        right: auto;
+        transform: none;
+        margin-top: 2rem;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .rover {
+        width: 60px;
+        height: 45px;
+    }
+    
+    .rover-head {
+        width: 40px;
+        height: 25px;
+        top: -12px;
+        left: 10px;
+    }
+    
+    .rover-speech-bubble {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        margin-top: 10px;
+        white-space: normal;
+        text-align: center;
     }
 }
