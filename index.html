@@ -68,7 +68,7 @@
                     </div>
                 </div>
                 <div class="rover-speech-bubble" id="rover-speech">
-                    Hi, I am your new pet here.
+                    and I am J-0015, your guide during your visit to this page of wonders.
                 </div>
             </div>
         </div>
@@ -260,6 +260,18 @@
             <p>&copy; 2024 Your Name. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Obstacle Editor UI root elements (created hidden; toggled by JS) -->
+    <button id="obst-editor-toggle" class="obst-editor-toggle" aria-label="Toggle Obstacle Editor">Obstacles</button>
+    <div id="obst-editor-overlay" class="obst-editor-overlay" style="display:none; width: 100%; height: 100%;"></div>
+    <div id="obst-editor-toolbar" class="obst-editor-toolbar" style="display:none;">
+        <button id="obst-add">Add Rect</button>
+        <button id="obst-export">Export</button>
+        <button id="obst-import">Import</button>
+        <button id="obst-clear">Clear</button>
+        <span id="obst-hint">Drag to move, corners/edges to resize</span>
+    </div>
+    <input type="file" id="obst-file-input" accept=".json" style="display:none;">
 
     <script src="script.js"></script>
 </body>
