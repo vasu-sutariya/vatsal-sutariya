@@ -39,27 +39,26 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// Contact form handling
+// Contact form handling -> open email client (mailto)
 const contactForm = document.querySelector('.contact-form');
 if (contactForm) {
     contactForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        // Get form data
-        const formData = new FormData(this);
-        const name = this.querySelector('input[type="text"]').value;
-        const email = this.querySelector('input[type="email"]').value;
-        const message = this.querySelector('textarea').value;
-        
-        // Simple validation
+
+        const name = this.querySelector('input[type="text"]').value.trim();
+        const email = this.querySelector('input[type="email"]').value.trim();
+        const message = this.querySelector('textarea').value.trim();
+
         if (!name || !email || !message) {
             alert('Please fill in all fields');
             return;
         }
-        
-        // Here you would typically send the data to a server
-        // For now, we'll just show a success message
-        alert('Thank you for your message! I\'ll get back to you soon.');
+
+        const subject = encodeURIComponent(`Portfolio message from ${name}`);
+        const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
+        const mailto = `mailto:vasutariya2025@gmail.com?subject=${subject}&body=${body}`;
+
+        window.location.href = mailto;
         this.reset();
     });
 }

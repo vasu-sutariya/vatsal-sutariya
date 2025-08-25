@@ -108,6 +108,15 @@ body {
     color: #fbbf24;
 }
 
+.highlight-games {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1f2937;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-shadow: none;
+}
+
 .hero-subtitle {
     font-size: 1.5rem;
     margin-bottom: 1rem;
@@ -221,12 +230,19 @@ section {
 }
 
 .skill-tag {
-    background: #2563eb;
-    color: white;
     padding: 8px 16px;
     border-radius: 20px;
     font-size: 0.9rem;
     font-weight: 500;
+    color: white;
+}
+
+.skill-language {
+    background: #2563eb;
+}
+
+.skill-software {
+    background: #059669;
 }
 
 /* Projects Section */
