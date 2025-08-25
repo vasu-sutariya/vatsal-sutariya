@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="#home">Portfolio</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#home" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#about" class="nav-link">About</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#projects" class="nav-link">Projects</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#contact" class="nav-link">Contact</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Hi, I'm <span class="highlight">Vasu</span></h1>
+                <p class="hero-subtitle">Robotics Software Engineer</p>
+                <p class="hero-description">
+                    I create control, visualization, and simulation software for robotic solutions.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#personal-projects" class="btn btn-primary">View My Work</a>
+                    <a href="#contact" class="btn btn-secondary">Get In Touch</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">About Me</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>
+                        I'm a passionate developer with expertise in modern robotics technologies. I love turning complex
+                        problems into simple, beautiful and user-friendly solutions.
+                    </p>
+                    <p>
+                        I enjoy building robotics software and simulations, approaching them much like creating <strong>GAMES</strong>:
+                        where logic, creativity and problem-solving come together to bring systems to life.
+                    </p>
+                    <div class="skills">
+                        <h3>Skills & Technologies</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag skill-language">C++</span>
+                            <span class="skill-tag skill-language">Python</span>
+                            <span class="skill-tag skill-software">UNITY</span>
+                            <span class="skill-tag skill-software">ROS2 - Gazebo</span>
+                            <span class="skill-tag skill-software">Isaac Sim</span>
+                            <span class="skill-tag skill-software">Mission planner - Mavlink</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Personal Projects Section -->
+    <section id="personal-projects" class="projects">
+        <div class="container">
+            <h2 class="section-title">My Personal Projects</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="images/uralight-demo.gif" alt="URALIGHT Demo" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <div class="project-content">
+                        <h3>URALIGHT</h3>
+                        <p>A Unity-based software for manipulator robots that enables environment building, motion planning, simulation, and customizable user interfaces.</p>
+                        <div class="project-tech">
+                            <span>Unity</span>
+                            <span>Motion Planning</span>
+                            <span>UR Script</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/vasu-sutariya/Uralight" class="project-link"><i class="fab fa-github"></i> Code</a>
+                            <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Demo</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="project-content">
+                        <h3>Another Personal Project</h3>
+                        <p>Brief value-focused summary; link a demo video if available.</p>
+                        <div class="project-tech">
+                            <span>Unity</span>
+                            <span>C++</span>
+                            <span>Isaac Sim</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="#" class="project-link"><i class="fab fa-github"></i> Code</a>
+                            <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Live</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects">
+        <div class="container">
+            <h2 class="section-title">Academic Projects</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-image">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <div class="project-content">
+                        <h3>E-Commerce Platform</h3>
+                        <p>A full-stack e-commerce solution with React frontend and Node.js backend.</p>
+                        <div class="project-tech">
+                            <span>React</span>
+                            <span>Node.js</span>
+                            <span>MongoDB</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="#" class="project-link"><i class="fab fa-github"></i> Code</a>
+                            <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Live</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="project-content">
+                        <h3>Task Management App</h3>
+                        <p>A responsive task management application with real-time updates.</p>
+                        <div class="project-tech">
+                            <span>Vue.js</span>
+                            <span>Firebase</span>
+                            <span>CSS3</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="#" class="project-link"><i class="fab fa-github"></i> Code</a>
+                            <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Live</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="project-content">
+                        <h3>Data Visualization Dashboard</h3>
+                        <p>Interactive dashboard for data analysis and visualization.</p>
+                        <div class="project-tech">
+                            <span>D3.js</span>
+                            <span>Python</span>
+                            <span>Flask</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="#" class="project-link"><i class="fab fa-github"></i> Code</a>
+                            <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Live</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Let's work together!</h3>
+                    <p>I'm always interested in new opportunities and exciting projects.</p>
+                    <div class="contact-links">
+                        <a href="mailto:vasutariya2025@gmail.com" class="contact-link">
+                            <i class="fas fa-envelope"></i>
+                            vasutariya2025@gmail.com
+                        </a>
+                        <a href="https://github.com/vasu-sutariya" class="contact-link">
+                            <i class="fab fa-github"></i>
+                            github.com/vasu-sutariya
+                        </a>
+                        <a href="https://www.linkedin.com/in/vatsal-sutariya" class="contact-link">
+                            <i class="fab fa-linkedin"></i>
+                            linkedin.com/in/vatsal-sutariya
+                        </a>
+                    </div>
+                </div>
+                <form class="contact-form">
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Your Message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Your Name. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
