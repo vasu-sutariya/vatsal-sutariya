@@ -279,39 +279,38 @@ class Rover {
         
         // Capture position BEFORE switching context to avoid jump
         const preRect = this.rover.getBoundingClientRect();
-        const preCenterX = preRect.left + preRect.width / 2;
-        const preCenterY = preRect.top + preRect.height / 2;
+        const scrollX = window.scrollX || document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+        const scrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        const preCenterXDoc = preRect.left + scrollX + preRect.width / 2;
+        const preCenterYDoc = preRect.top + scrollY + preRect.height / 2;
 
-        // Reparent to body so position: fixed is relative to viewport, not transformed ancestor
+        // Reparent to body so position is relative to the document
         this.originalParent = this.rover.parentNode;
         this.originalNextSibling = this.rover.nextSibling;
         document.body.appendChild(this.rover);
 
-        // Switch to fixed inline and place exactly where it was on screen
-        this.rover.style.position = 'fixed';
-        this.rover.style.left = preRect.left + 'px';
-        this.rover.style.top = preRect.top + 'px';
+        // Switch to absolute and place exactly where it was in document space
+        this.rover.style.position = 'absolute';
+        this.rover.style.left = (preRect.left + scrollX) + 'px';
+        this.rover.style.top = (preRect.top + scrollY) + 'px';
         this.rover.classList.add('following');
         
         // Store initial position for reset
         if (!this.initialPosition) {
             this.initialPosition = {
-                x: preRect.left,
-                y: preRect.top
+                x: preRect.left + scrollX,
+                y: preRect.top + scrollY
             };
         }
 
-        // Initialize position - get current center position after adding 'following' class
-        // Initialize physics position from pre-fixed center
-        this.position.x = preCenterX;
-        this.position.y = preCenterY;
+        // Initialize physics position from document-space center
+        this.position.x = preCenterXDoc;
+        this.position.y = preCenterYDoc;
         
         // Set initial target to current position so it doesn't jump
         this.targetPosition.x = this.position.x;
         this.targetPosition.y = this.position.y;
         
-        console.log('Starting follow - Initial position:', this.position.x, this.position.y);
-
         // Set inline position immediately to avoid any jump
         this.rover.style.left = (this.position.x - preRect.width / 2) + 'px';
         this.rover.style.top = (this.position.y - preRect.height / 2) + 'px';
@@ -364,23 +363,20 @@ class Rover {
     updateTarget(e) {
         if (!this.isFollowing) return;
         
-        // Set target position to mouse cursor (rover will center itself)
-        let tx = e.clientX;
-        let ty = e.clientY;
+        // Set target position to mouse cursor in document space
+        const scrollX = window.scrollX || document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+        const scrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        let tx = e.clientX + scrollX;
+        let ty = e.clientY + scrollY;
 
-        // Clamp target to be outside obstacles (inflated by rover half-size)
+        // Clamp target to be outside obstacles (inflated by rover half-size), in document space
         const roverRect = this.rover.getBoundingClientRect();
-        const inflatedObstacles = this.getInflatedObstacles(roverRect.width / 2, roverRect.height / 2);
-        const clamped = this.clampPointOutsideRects({ x: tx, y: ty }, inflatedObstacles);
+        const inflatedObstaclesDoc = this.getInflatedObstaclesDoc(roverRect.width / 2, roverRect.height / 2);
+        const clamped = this.clampPointOutsideRects({ x: tx, y: ty }, inflatedObstaclesDoc);
         this.targetPosition.x = clamped.x;
         this.targetPosition.y = clamped.y;
         
-        // Debug: Log positions
-        console.log('Mouse position:', e.clientX, e.clientY);
-        console.log('Target position:', this.targetPosition.x, this.targetPosition.y);
-        console.log('Rover position:', this.position.x, this.position.y);
-        
-        // Debug: Show target visually
+        // Debug: Show target visually (viewport marker)
         this.showDebugTarget();
     }
 
@@ -389,15 +385,15 @@ class Rover {
         
         // Occasionally refresh obstacles while animating
         this.recomputeObstacles();
-        
-        // Get current rover position from DOM
+
+        // Get current rover size from DOM
         const roverRect = this.rover.getBoundingClientRect();
         const roverWidth = roverRect.width;
         const roverHeight = roverRect.height;
         
-        // Calculate current center position of rover
-        const currentCenterX = roverRect.left + roverWidth / 2;
-        const currentCenterY = roverRect.top + roverHeight / 2;
+        // Current center in document space is tracked by this.position
+        const currentCenterX = this.position.x;
+        const currentCenterY = this.position.y;
         
         // Calculate distance to target
         const dx = this.targetPosition.x - currentCenterX;
@@ -418,19 +414,19 @@ class Rover {
             this.velocity.x *= this.friction;
             this.velocity.y *= this.friction;
             
-            // Update position
+            // Update position in document space
             this.position.x += this.velocity.x;
             this.position.y += this.velocity.y;
             
-            // Collision resolution: prevent rover from entering obstacles
-            const afterMoveRect = {
+            // Collision resolution: prevent rover from entering obstacles (document space)
+            const afterMoveRectDoc = {
                 left: this.position.x - roverWidth / 2,
                 top: this.position.y - roverHeight / 2,
                 width: roverWidth,
                 height: roverHeight
             };
-            const inflatedObstacles = this.getInflatedObstacles(0, 0, this.obstaclePadding);
-            const resolved = this.resolveRectOutsideObstacles(afterMoveRect, inflatedObstacles);
+            const inflatedObstaclesDoc = this.getInflatedObstaclesDoc(0, 0, this.obstaclePadding);
+            const resolved = this.resolveRectOutsideObstacles(afterMoveRectDoc, inflatedObstaclesDoc);
             if (resolved.collided) {
                 // Reduce velocity on collision for a soft stop
                 this.velocity.x *= -0.2;
@@ -440,7 +436,7 @@ class Rover {
                 this.position.y = resolved.rect.top + roverHeight / 2;
             }
 
-            // Update rover position - center it on the target (or resolved)
+            // Update rover position - center it on the target (document space to style left/top)
             this.rover.style.left = (this.position.x - roverWidth / 2) + 'px';
             this.rover.style.top = (this.position.y - roverHeight / 2) + 'px';
             
@@ -454,12 +450,6 @@ class Rover {
                     wheel.style.animationDuration = '2s';
                 }
             });
-            
-            // Debug: Log current positions
-            console.log('Distance to target:', distance);
-            console.log('Current center:', currentCenterX, currentCenterY);
-            console.log('Target:', this.targetPosition.x, this.targetPosition.y);
-            console.log('Velocity:', this.velocity.x, this.velocity.y);
         }
         
         // Continue animation loop
@@ -527,6 +517,20 @@ class Rover {
                 height: r.height + 2 * (padY + extra)
             };
         });
+    }
+
+    getInflatedObstaclesDoc(inflateX = 0, inflateY = 0, extraPadding = 0) {
+        // this.obstacles are maintained as viewport-space rects; convert to document space by adding scroll
+        const scrollX = window.scrollX || document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+        const scrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        const padX = inflateX + extraPadding;
+        const padY = inflateY + extraPadding;
+        return this.obstacles.map(r => ({
+            left: (r.left + scrollX) - padX,
+            top: (r.top + scrollY) - padY,
+            width: r.width + 2 * padX,
+            height: r.height + 2 * padY
+        }));
     }
 
     clampPointOutsideRects(point, rects) {
