@@ -303,8 +303,23 @@ function positionRobotAtHero(){
 }
 
 window.addEventListener('load', positionRobotAtHero);
-window.addEventListener('resize', positionRobotAtHero);
-// Throttled scroll handler for mobile performance
+// Only reposition robot on actual window resize, not scroll-triggered resize events
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    // Only reposition if it's a significant resize (not just scroll)
+    const currentWidth = window.innerWidth;
+    const currentHeight = window.innerHeight;
+    if (Math.abs(currentWidth - (window.lastWidth || currentWidth)) > 50 || 
+        Math.abs(currentHeight - (window.lastHeight || currentHeight)) > 50) {
+      positionRobotAtHero();
+      window.lastWidth = currentWidth;
+      window.lastHeight = currentHeight;
+    }
+  }, 250);
+});
+// Throttled scroll handler for mobile performance - only rebuild obstacles, don't reposition robot
 let scrollTimeout;
 window.addEventListener('scroll', () => {
   clearTimeout(scrollTimeout);
