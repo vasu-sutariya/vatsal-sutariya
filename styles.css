@@ -113,7 +113,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-off
   .section#hero .subtitle{font-size:18px;line-height:1.45}
   .skills{grid-template-columns:repeat(2,minmax(0,1fr))}
   .project-thumb{height:180px}
-  .projects{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .projects{grid-template-columns:repeat(1,minmax(0,1fr))}
 }
 
 @media (prefers-reduced-motion: reduce){

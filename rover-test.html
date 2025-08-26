@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Rover Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+        
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            border: 2px solid #333;
+        }
+        
+        .rover {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #4CAF50;
+            border-radius: 50%;
+            border: 3px solid #2E7D32;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.1s ease;
+        }
+        
+        .rover::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 8px;
+            height: 8px;
+            background: #2E7D32;
+            border-radius: 50%;
+        }
+        
+        .rover::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: #2E7D32;
+            border-radius: 50%;
+        }
+        
+        .obstacle {
+            position: absolute;
+            background: #FF5722;
+            border: 2px solid #D84315;
+            opacity: 0.8;
+        }
+        
+        .goal {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #2196F3;
+            border: 3px solid #1976D2;
+            border-radius: 50%;
+            z-index: 500;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 2000;
+        }
+        
+        .controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 2000;
+        }
+        
+        .controls button {
+            margin: 5px;
+            padding: 8px 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .controls button:hover {
+            background: #45a049;
+        }
+        
+        .controls button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h3>Simple Rover Navigation</h3>
+        <p>Click anywhere to set a new goal</p>
+        <p>Rover will avoid obstacles automatically</p>
+        <p>Status: <span id="status">Initializing...</span></p>
+    </div>
+    
+    <div class="controls">
+        <button id="startBtn">Start Rover</button>
+        <button id="stopBtn" disabled>Stop Rover</button>
+        <button id="resetBtn">Reset Position</button>
+        <button id="addObstacleBtn">Add Obstacle</button>
+        <button id="clearObstaclesBtn">Clear Obstacles</button>
+    </div>
+    
+    <div class="container" id="container">
+        <!-- Rover will be positioned here -->
+        <div class="rover" id="rover" style="left: 50px; top: 50px;"></div>
+        
+        <!-- Default obstacles -->
+        <div class="obstacle" style="left: 200px; top: 150px; width: 100px; height: 80px;"></div>
+        <div class="obstacle" style="left: 400px; top: 300px; width: 120px; height: 60px;"></div>
+        <div class="obstacle" style="left: 150px; top: 400px; width: 80px; height: 100px;"></div>
+        <div class="obstacle" style="left: 500px; top: 200px; width: 60px; height: 120px;"></div>
+        
+        <!-- Goal marker -->
+        <div class="goal" id="goal" style="left: 600px; top: 400px;"></div>
+    </div>
+    
+    <script src="rover.js"></script>
+    <script>
+        // Additional test functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const addObstacleBtn = document.getElementById('addObstacleBtn');
+            const clearObstaclesBtn = document.getElementById('clearObstaclesBtn');
+            const statusSpan = document.getElementById('status');
+            const container = document.getElementById('container');
+            
+            let roverInstance = null;
+            
+            // Wait for rover to be initialized
+            const checkRover = setInterval(() => {
+                if (window.simpleRover) {
+                    roverInstance = window.simpleRover;
+                    clearInterval(checkRover);
+                    setupControls();
+                    updateStatus();
+                }
+            }, 100);
+            
+            function setupControls() {
+                startBtn.addEventListener('click', () => {
+                    roverInstance.start();
+                    updateStatus();
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                });
+                
+                stopBtn.addEventListener('click', () => {
+                    roverInstance.stop();
+                    updateStatus();
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                });
+                
+                resetBtn.addEventListener('click', () => {
+                    const rover = document.getElementById('rover');
+                    rover.style.left = '50px';
+                    rover.style.top = '50px';
+                    roverInstance.updatePosition();
+                    updateStatus();
+                });
+                
+                addObstacleBtn.addEventListener('click', () => {
+                    const left = Math.random() * (container.offsetWidth - 100);
+                    const top = Math.random() * (container.offsetHeight - 100);
+                    const width = 50 + Math.random() * 100;
+                    const height = 50 + Math.random() * 100;
+                    
+                    const obstacle = document.createElement('div');
+                    obstacle.className = 'obstacle';
+                    obstacle.style.left = left + 'px';
+                    obstacle.style.top = top + 'px';
+                    obstacle.style.width = width + 'px';
+                    obstacle.style.height = height + 'px';
+                    container.appendChild(obstacle);
+                    
+                    roverInstance.addObstacle(left, top, width, height);
+                    console.log('Added obstacle at:', left, top, width, height);
+                });
+                
+                clearObstaclesBtn.addEventListener('click', () => {
+                    const obstacles = document.querySelectorAll('.obstacle');
+                    obstacles.forEach(obs => obs.remove());
+                    roverInstance.clearObstacles();
+                    console.log('Cleared all obstacles');
+                });
+            }
+            
+            function updateStatus() {
+                if (!roverInstance) return;
+                
+                const position = roverInstance.getPosition();
+                const target = roverInstance.getTarget();
+                const isActive = roverInstance.isActive;
+                const goalReached = roverInstance.isGoalReached();
+                
+                let status = `Position: (${Math.round(position.x)}, ${Math.round(position.y)}) | `;
+                status += `Target: (${Math.round(target.x)}, ${Math.round(target.y)}) | `;
+                status += `Active: ${isActive} | `;
+                status += `Goal Reached: ${goalReached}`;
+                
+                statusSpan.textContent = status;
+            }
+            
+            // Update status every 100ms
+            setInterval(updateStatus, 100);
+            
+            // Override the default click handler to show goal marker
+            document.removeEventListener('click', window.simpleRover ? window.simpleRover.clickHandler : null);
+            document.addEventListener('click', (e) => {
+                if (e.target.id === 'rover') return;
+                
+                const goal = document.getElementById('goal');
+                goal.style.left = (e.clientX - 15) + 'px';
+                goal.style.top = (e.clientY - 15) + 'px';
+                
+                if (roverInstance) {
+                    roverInstance.setGoal(e.clientX, e.clientY);
+                    if (!roverInstance.isActive) {
+                        roverInstance.start();
+                        startBtn.disabled = true;
+                        stopBtn.disabled = false;
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

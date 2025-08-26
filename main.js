@@ -252,7 +252,7 @@ const guide = {
   showAtTimeMs: 0
 };
 
-let mouse = {x: width*0.7, y: height*0.3};
+let mouse = {x: null, y: null};
 window.addEventListener('pointermove', (e)=>{
   mouse.x = e.pageX; mouse.y = e.pageY;
 });
@@ -264,6 +264,7 @@ function scheduleObstaclesRebuild(){
 window.addEventListener('load', scheduleObstaclesRebuild);
 window.addEventListener('resize', ()=>{
   resizeCanvas();
+  scheduleObstaclesRebuild();
 });
 
 function positionRobotAtHero(){
@@ -274,9 +275,23 @@ function positionRobotAtHero(){
   const top = rect.top + window.scrollY;
   const right = rect.right + window.scrollX;
   const bottom = rect.bottom + window.scrollY;
-  robot.x = right - 500;
-  robot.y = top + (bottom - top) * 0.5;
+  
+  // Check if mobile (screen width <= 640px)
+  const isMobile = window.innerWidth <= 640;
+  
+  if(isMobile) {
+    // On mobile: position at bottom of screen, centered
+    robot.x = window.innerWidth * 0.5; // center horizontally
+    robot.y = window.innerHeight - 100; // near bottom of screen
+  } else {
+    // On desktop: position to the right of hero text
+    robot.x = right - 500;
+    robot.y = top + (bottom - top) * 0.5;
+  }
+  
   robot.vx = 0; robot.vy = 0;
+  robot.path = []; // Clear any existing path
+  robot.pathIndex = 0;
   robot.freezeTimer = 3; // stay for 3 seconds on spawn
   // schedule guide to appear after 1.5s
   guide.text = 'and I am J-0015, your guide';
@@ -289,6 +304,7 @@ function positionRobotAtHero(){
 
 window.addEventListener('load', positionRobotAtHero);
 window.addEventListener('resize', positionRobotAtHero);
+window.addEventListener('scroll', scheduleObstaclesRebuild);
 
 // Replan at a limited rate
 let lastPlanTime = 0;
@@ -296,6 +312,7 @@ let planIntervalMs = 80; // faster replanning to follow moving targets
 
 function planIfNeeded(ts){
   if(ts - lastPlanTime < planIntervalMs) return;
+  if(mouse.x === null || mouse.y === null) return; // Wait for first mouse movement
   lastPlanTime = ts;
   const start = worldToGrid(robot.x, robot.y);
   const goal = worldToGrid(mouse.x, mouse.y);
@@ -479,10 +496,11 @@ function updateRobotAnimation(dt){
 }
 
 function handleRobotDialogues(){
+  // Use actual visible viewport dimensions
   const viewportLeft = window.scrollX;
   const viewportTop = window.scrollY;
-  const viewportRight = viewportLeft + window.innerWidth;
-  const viewportBottom = viewportTop + window.innerHeight;
+  const viewportRight = viewportLeft + Math.min(window.innerWidth, document.documentElement.clientWidth);
+  const viewportBottom = viewportTop + Math.min(window.innerHeight, document.documentElement.clientHeight);
 
   const isOffscreen = (
     robot.x < viewportLeft ||
@@ -506,17 +524,17 @@ function handleRobotDialogues(){
     if(robot.x > viewportRight){
       const cy = clamp(robot.y, viewportTop + 20, viewportBottom - 60);
       const d = Math.abs(robot.x - viewportRight);
-      if(d < minDist){ minDist = d; ax = viewportRight - 180; ay = cy; }
+      if(d < minDist){ minDist = d; ax = viewportRight - Math.min(180, (viewportRight - viewportLeft) * 0.4); ay = cy; }
     }
     // top edge
     if(robot.y < viewportTop){
-      const cx = clamp(robot.x, viewportLeft + 20, viewportRight - 180);
+      const cx = clamp(robot.x, viewportLeft + 20, viewportRight - Math.min(180, (viewportRight - viewportLeft) * 0.4));
       const d = Math.abs(viewportTop - robot.y);
       if(d < minDist){ minDist = d; ax = cx; ay = viewportTop + 12; }
     }
     // bottom edge
     if(robot.y > viewportBottom){
-      const cx = clamp(robot.x, viewportLeft + 20, viewportRight - 180);
+      const cx = clamp(robot.x, viewportLeft + 20, viewportRight - Math.min(180, (viewportRight - viewportLeft) * 0.4));
       const d = Math.abs(robot.y - viewportBottom);
       if(d < minDist){ minDist = d; ax = cx; ay = viewportBottom - 60; }
     }
@@ -678,7 +696,7 @@ function drawRobot(){
     if(guide.stickToAnchor && guide.anchorX!=null && guide.anchorY!=null){
       drawBubble(guide.anchorX, guide.anchorY, guide.text);
     } else {
-      drawBubble(cx + 30, cy - 24, guide.text);
+    drawBubble(cx + 30, cy - 24, guide.text);
     }
   }
 }
@@ -733,8 +751,8 @@ function drawBubble(x, y, text){
   // Clamp bubble within viewport to avoid being cut off
   const viewportLeft = window.scrollX;
   const viewportTop = window.scrollY;
-  const viewportRight = viewportLeft + window.innerWidth;
-  const viewportBottom = viewportTop + window.innerHeight;
+  const viewportRight = viewportLeft + Math.min(window.innerWidth, document.documentElement.clientWidth);
+  const viewportBottom = viewportTop + Math.min(window.innerHeight, document.documentElement.clientHeight);
   const margin = 8;
   const nx = clamp(x, viewportLeft + margin, Math.max(viewportLeft + margin, viewportRight - w - margin));
   const ny = clamp(y, viewportTop + margin, Math.max(viewportTop + margin, viewportBottom - h - margin));
@@ -795,7 +813,7 @@ function frame(ts){
 }
 requestAnimationFrame(frame);
 
-// Footer year
-document.getElementById('year').textContent = new Date().getFullYear();
+// Footer year - removed as element doesn't exist
+// document.getElementById('year').textContent = new Date().getFullYear();
 
 
