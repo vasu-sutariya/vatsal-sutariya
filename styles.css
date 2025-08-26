@@ -17,6 +17,7 @@ body{
   color:var(--fg);
   background:var(--bg);
   overflow-x:hidden;
+  scroll-behavior:smooth
 }
 
 .skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
@@ -33,8 +34,7 @@ body{
 }
 
 .site-header{display:none}
-.site-header .container{}
-.site-header h1{}
+/* .site-header .container and .site-header h1 intentionally omitted (header hidden) */
 .subtitle{margin:0;color:var(--muted);font-weight:400}
 .site-nav{display:flex;gap:16px;flex-wrap:wrap}
 .site-nav a{color:var(--fg);text-decoration:none;border-bottom:1px dashed transparent}
@@ -43,13 +43,21 @@ body{
 
 .site-main{max-width:1100px;margin:0 auto;padding:24px}
 .section{margin:80px 0}
-.section#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;margin:0}
-.section#hero h2{font-size:64px;font-weight:800;letter-spacing:0.5px;margin:0 0 10px 0;line-height:5}
+.section#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;margin:0;transform:translateY(-28px)}
+.section#hero h2{font-size:64px;font-weight:800;letter-spacing:0.5px;margin:0 0 10px 0;line-height:1.15}
+.typewriter{display:inline-block;position:relative;white-space:nowrap;overflow:hidden;animation:typing 3s steps(18,end) 0.2s 1 both}
+@keyframes typing{from{width:0} to{width:100%}}
+@keyframes blink{50%{border-color:transparent}}
 .section#hero .subtitle{font-size:22px;opacity:0.95;margin:0 0 14px 0;line-height:2}
 .section#hero p{max-width:780px;font-size:18px;color:var(--fg);opacity:0.96;line-height:2}
 .card{background:transparent;border:none;border-radius:0;padding:0;box-shadow:none}
 .card:hover{border-color:transparent}
 .project{padding:12px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,0.02)}
+.project-thumb{width:100%;height:220px;object-fit:cover;display:block;border-radius:8px;margin-top:8px;border:1px solid var(--stroke)}
+.project-title{display:flex;align-items:center;justify-content:center;gap:8px}
+.project-title h3{margin:0}
+.project-link{color:#6cf0ffa4;text-decoration:none;display:inline-flex;align-items:center}
+.project-link:hover{color:#8ff4ff}
 
 /* Headings */
 .section h2{margin:0 0 12px 0;font-size:22px;text-align:center}
@@ -75,16 +83,17 @@ body{
 .btn-ghost{background:linear-gradient(180deg, #1b233d 0%, #0f162c 100%);color:var(--fg);border-color:rgba(255,255,255,0.08)}
 
 /* Badges */
-.skills{display:flex;flex-wrap:wrap;gap:8px;padding-left:0}
 .skills li{list-style:none}
-.badge{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--stroke);background:rgba(255,255,255,0.04);font-size:14px}
+.badge{display:flex;align-items:center;justify-content:center;padding:10px 12px;min-height:40px;border-radius:10px;border:1px solid var(--stroke);background:rgba(255,255,255,0.04);font-size:14px;text-align:center}
 
-.skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:0;padding-left:18px}
-.projects{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.skills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0;padding-left:0;justify-items:stretch}
+.skills li .badge{width:100%}
+.projects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .project h3{margin:0 0 6px 0}
-.project ul{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0 0;padding-left:0}
-.project ul li{list-style:none}
-.project .actions{margin-top:10px}
+.project ul{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0 0;padding-left:0;justify-content:center}
+.project ul li{list-style:none;display:inline-flex;align-items:center;justify-content:center;padding:10px 12px;min-height:40px;border-radius:10px;border:1px solid var(--stroke);background:rgba(255,255,255,0.04);font-size:14px;text-align:center}
+.project .actions{margin-top:10px;justify-content:center}
+.project p{text-align:center}
 button,a{transition:filter .2s ease, background-color .2s ease, color .2s ease}
 button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
 
@@ -99,8 +108,12 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-off
   .site-header .container{padding:14px 16px}
   .site-main{padding:16px}
   .section{margin:48px 0}
-  .section#hero h2{font-size:42px;line-height:1.2}
+  .section#hero h2{font-size:42px;line-height:1.1}
+  .typewriter{animation:typing 2.2s steps(18,end) 0.2s 1 both}
   .section#hero .subtitle{font-size:18px;line-height:1.45}
+  .skills{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .project-thumb{height:180px}
+  .projects{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 @media (prefers-reduced-motion: reduce){

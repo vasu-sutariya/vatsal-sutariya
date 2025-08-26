@@ -70,7 +70,7 @@ function rebuildObstaclesFromDOM(){
   grid = makeGrid();
   const selectors = [
     // Section text elements
-    'section h1', 'section h2', 'section h3', 'section p', 'section li', 'section a', '.badge', '.btn'
+    'section h1', 'section h2', 'section h3', 'section p', 'section li', 'section a', '.badge', '.btn', 'img', '.project-thumb'
   ];
   const items = document.querySelectorAll(selectors.join(','));
   items.forEach(el => {
@@ -222,12 +222,34 @@ let robot = {
     bobPhase: 0
   }
 };
+// Collision dialogue state
+const collisionDialogues = [
+  'Ouch !!',
+  'OUIIII !!!!!!!',
+  'OWW !!',
+  'FUCKKK !!!!!!!!!!!!'
+];
+let collisionDialogueIndex = 0;
+let lastCollisionDialogueTimeMs = 0;
+let lastSkillsDialogueTimeMs = 0;
+let hasShownSkillsDialogue = false;
+let lastProjectsDialogueTimeMs = 0;
+let hasShownProjectsDialogue = false;
+
 
 // Guide caption next to the robot
 const guide = {
   text: 'and I am J-0015, your guide',
   visible: true,
-  timer: 0
+  timer: 0,
+  durationSec: 1.8,
+  // Optional anchor for drawing bubble at a world position not tied to robot
+  anchorX: null,
+  anchorY: null,
+  stickToAnchor: false,
+  // delayed show support
+  pendingShow: false,
+  showAtTimeMs: 0
 };
 
 let mouse = {x: width*0.7, y: height*0.3};
@@ -256,7 +278,13 @@ function positionRobotAtHero(){
   robot.y = top + (bottom - top) * 0.5;
   robot.vx = 0; robot.vy = 0;
   robot.freezeTimer = 3; // stay for 3 seconds on spawn
-  guide.visible = true; guide.timer = 0;
+  // schedule guide to appear after 1.5s
+  guide.text = 'and I am J-0015, your guide';
+  guide.visible = false;
+  guide.timer = 0;
+  guide.durationSec = 3.2; // slightly longer for intro
+  guide.pendingShow = true;
+  guide.showAtTimeMs = performance.now() + 1500;
 }
 
 window.addEventListener('load', positionRobotAtHero);
@@ -295,6 +323,7 @@ function stepAlongPath(dt){
     robot.vy *= Math.pow(0.0001, dt);
     robot.x += robot.vx * dt;
     robot.y += robot.vy * dt;
+    resolveRobotCollisions();
     return;
   }
 
@@ -337,11 +366,90 @@ function stepAlongPath(dt){
   robot.x += robot.vx * dt;
   robot.y += robot.vy * dt;
 
+  // prevent penetrating obstacles
+  resolveRobotCollisions();
+
   // advance waypoint when close enough
   if(dist <= Math.max(6, robot.maxSpeed * dt)){
     robot.x = tx; robot.y = ty;
     if(robot.pathIndex < robot.path.length - 1){
       robot.pathIndex++;
+    }
+  }
+}
+
+// --- Collision handling (circle vs grid obstacles) ---
+function forEachObstacleNear(x, y, radius, fn){
+  const minC = clamp(Math.floor((x - radius) / cellSize), 0, grid.cols - 1);
+  const maxC = clamp(Math.floor((x + radius) / cellSize), 0, grid.cols - 1);
+  const minR = clamp(Math.floor((y - radius) / cellSize), 0, grid.rows - 1);
+  const maxR = clamp(Math.floor((y + radius) / cellSize), 0, grid.rows - 1);
+  for(let r=minR; r<=maxR; r++){
+    for(let c=minC; c<=maxC; c++){
+      if(grid.nodes[r][c] === 1){ fn(c, r); }
+    }
+  }
+}
+
+function resolveRobotCollisions(){
+  // Iterate a few times to resolve multiple contacts
+  let collisionThisFrame = false;
+  for(let iter=0; iter<2; iter++){
+    let any = false;
+    forEachObstacleNear(robot.x, robot.y, robot.radius + cellSize, (c, r)=>{
+      const left = c * cellSize;
+      const top = r * cellSize;
+      const right = left + cellSize;
+      const bottom = top + cellSize;
+      const closestX = clamp(robot.x, left, right);
+      const closestY = clamp(robot.y, top, bottom);
+      let dx = robot.x - closestX;
+      let dy = robot.y - closestY;
+      let dist = Math.hypot(dx, dy);
+      if(dist < robot.radius){
+        any = true;
+        collisionThisFrame = true;
+        // compute push-out normal
+        let nx, ny;
+        if(dist > 0){
+          nx = dx / dist; ny = dy / dist;
+        } else {
+          // center is inside rectangle corner; choose shortest axis to push out
+          const toLeft = Math.abs(robot.x - left);
+          const toRight = Math.abs(right - robot.x);
+          const toTop = Math.abs(robot.y - top);
+          const toBottom = Math.abs(bottom - robot.y);
+          const minH = Math.min(toLeft, toRight);
+          const minV = Math.min(toTop, toBottom);
+          if(minH < minV){
+            nx = (toLeft < toRight) ? -1 : 1; ny = 0; dist = 0;
+          } else {
+            nx = 0; ny = (toTop < toBottom) ? -1 : 1; dist = 0;
+          }
+        }
+        const penetration = (robot.radius - dist) + 0.5; // small slop
+        robot.x += nx * penetration;
+        robot.y += ny * penetration;
+        // cancel velocity into the obstacle
+        const vn = robot.vx * nx + robot.vy * ny;
+        if(vn < 0){
+          robot.vx -= vn * nx;
+          robot.vy -= vn * ny;
+        }
+      }
+    });
+    if(!any) break;
+  }
+  // Trigger dialogue with cooldown when collision occurs
+  if(collisionThisFrame){
+    const now = Date.now();
+    if(now - lastCollisionDialogueTimeMs > 15000){
+      guide.text = collisionDialogues[collisionDialogueIndex];
+      guide.visible = true;
+      guide.stickToAnchor = false; // show near robot
+      guide.timer = 0;
+      collisionDialogueIndex = (collisionDialogueIndex + 1) % collisionDialogues.length;
+      lastCollisionDialogueTimeMs = now;
     }
   }
 }
@@ -365,8 +473,116 @@ function updateRobotAnimation(dt){
   // guide caption lifetime
   if(guide.visible){
     guide.timer += dt;
-    // keep visible for 6 seconds
-    if(guide.timer > 6){ guide.visible = false; }
+    // keep visible for a shorter duration
+    if(guide.timer > (guide.durationSec || 1.8)){ guide.visible = false; }
+  }
+}
+
+function handleRobotDialogues(){
+  const viewportLeft = window.scrollX;
+  const viewportTop = window.scrollY;
+  const viewportRight = viewportLeft + window.innerWidth;
+  const viewportBottom = viewportTop + window.innerHeight;
+
+  const isOffscreen = (
+    robot.x < viewportLeft ||
+    robot.x > viewportRight ||
+    robot.y < viewportTop ||
+    robot.y > viewportBottom
+  );
+
+  if(isOffscreen){
+    // Determine nearest edge point where the robot "leaves" the screen
+    let ax = robot.x;
+    let ay = robot.y;
+    let minDist = Infinity;
+    // left edge
+    if(robot.x < viewportLeft){
+      const cy = clamp(robot.y, viewportTop + 20, viewportBottom - 60);
+      const d = Math.abs(viewportLeft - robot.x);
+      if(d < minDist){ minDist = d; ax = viewportLeft + 12; ay = cy; }
+    }
+    // right edge
+    if(robot.x > viewportRight){
+      const cy = clamp(robot.y, viewportTop + 20, viewportBottom - 60);
+      const d = Math.abs(robot.x - viewportRight);
+      if(d < minDist){ minDist = d; ax = viewportRight - 180; ay = cy; }
+    }
+    // top edge
+    if(robot.y < viewportTop){
+      const cx = clamp(robot.x, viewportLeft + 20, viewportRight - 180);
+      const d = Math.abs(viewportTop - robot.y);
+      if(d < minDist){ minDist = d; ax = cx; ay = viewportTop + 12; }
+    }
+    // bottom edge
+    if(robot.y > viewportBottom){
+      const cx = clamp(robot.x, viewportLeft + 20, viewportRight - 180);
+      const d = Math.abs(robot.y - viewportBottom);
+      if(d < minDist){ minDist = d; ax = cx; ay = viewportBottom - 60; }
+    }
+
+    guide.text = 'Wait for me!!!';
+    guide.visible = true;
+    guide.stickToAnchor = true;
+    guide.anchorX = ax;
+    guide.anchorY = ay;
+  } else {
+    // Restore to normal on-screen behavior
+    guide.stickToAnchor = false;
+
+    // Contextual dialogue near Skills section
+    const skillsEl = document.getElementById('skills');
+    if(skillsEl){
+      const r = skillsEl.getBoundingClientRect();
+      const skillsLeft = r.left + window.scrollX;
+      const skillsTop = r.top + window.scrollY;
+      const skillsRight = r.right + window.scrollX;
+      const skillsBottom = r.bottom + window.scrollY;
+      // Compute shortest distance from robot to the rectangle of the skills section
+      const dx = (robot.x < skillsLeft) ? skillsLeft - robot.x : (robot.x > skillsRight) ? robot.x - skillsRight : 0;
+      const dy = (robot.y < skillsTop) ? skillsTop - robot.y : (robot.y > skillsBottom) ? robot.y - skillsBottom : 0;
+      const dist = Math.hypot(dx, dy);
+      // Trigger when within threshold and rate-limited
+      if(dist < 160){
+        const now = Date.now();
+        if(!hasShownSkillsDialogue && (now - lastSkillsDialogueTimeMs > 25000)){
+          guide.text = 'IMO he is UNTIY pro';
+          guide.visible = true;
+          guide.timer = 0;
+          guide.durationSec = 4.5; // longer display for this message
+          guide.stickToAnchor = false; // show near robot
+          lastSkillsDialogueTimeMs = now;
+          hasShownSkillsDialogue = true; // only once
+        }
+      }
+    }
+
+    // Contextual dialogue near Projects sections
+    const showProjectsHintIfNear = (el)=>{
+      if(!el) return;
+      const r = el.getBoundingClientRect();
+      const left = r.left + window.scrollX;
+      const top = r.top + window.scrollY;
+      const right = r.right + window.scrollX;
+      const bottom = r.bottom + window.scrollY;
+      const dx = (robot.x < left) ? left - robot.x : (robot.x > right) ? robot.x - right : 0;
+      const dy = (robot.y < top) ? top - robot.y : (robot.y > bottom) ? robot.y - bottom : 0;
+      const dist = Math.hypot(dx, dy);
+      if(dist < 180){
+        const now = Date.now();
+        if(!hasShownProjectsDialogue && (now - lastProjectsDialogueTimeMs > 25000)){
+          guide.text = 'Press icon next to titles to learn more about projects';
+          guide.visible = true;
+          guide.timer = 0;
+          guide.durationSec = 5.0; // longer display for projects hint
+          guide.stickToAnchor = false;
+          lastProjectsDialogueTimeMs = now;
+          hasShownProjectsDialogue = true; // only once
+        }
+      }
+    };
+    showProjectsHintIfNear(document.getElementById('projects'));
+    showProjectsHintIfNear(document.getElementById('academic-projects'));
   }
 }
 
@@ -459,7 +675,11 @@ function drawRobot(){
 
   // guide caption bubble
   if(guide.visible){
-    drawBubble(cx + 30, cy - 24, guide.text);
+    if(guide.stickToAnchor && guide.anchorX!=null && guide.anchorY!=null){
+      drawBubble(guide.anchorX, guide.anchorY, guide.text);
+    } else {
+      drawBubble(cx + 30, cy - 24, guide.text);
+    }
   }
 }
 
@@ -510,22 +730,30 @@ function drawBubble(x, y, text){
   const metrics = ctx.measureText(text);
   const w = metrics.width + paddingX*2;
   const h = 26 + (metrics.actualBoundingBoxAscent ? 0 : 0);
+  // Clamp bubble within viewport to avoid being cut off
+  const viewportLeft = window.scrollX;
+  const viewportTop = window.scrollY;
+  const viewportRight = viewportLeft + window.innerWidth;
+  const viewportBottom = viewportTop + window.innerHeight;
+  const margin = 8;
+  const nx = clamp(x, viewportLeft + margin, Math.max(viewportLeft + margin, viewportRight - w - margin));
+  const ny = clamp(y, viewportTop + margin, Math.max(viewportTop + margin, viewportBottom - h - margin));
   ctx.fillStyle = 'rgba(11,16,32,0.92)';
   ctx.strokeStyle = 'rgba(255,255,255,0.12)';
   ctx.lineWidth = 1.5;
-  roundRect(ctx, x, y, w, h, 8);
+  roundRect(ctx, nx, ny, w, h, 8);
   ctx.fill();
   ctx.stroke();
   // tail
   ctx.beginPath();
-  ctx.moveTo(x - 6, y + h*0.7);
-  ctx.lineTo(x, y + h*0.55);
-  ctx.lineTo(x, y + h*0.85);
+  ctx.moveTo(nx - 6, ny + h*0.7);
+  ctx.lineTo(nx, ny + h*0.55);
+  ctx.lineTo(nx, ny + h*0.85);
   ctx.closePath();
   ctx.fill();
   // text
   ctx.fillStyle = '#e7ebff';
-  ctx.fillText(text, x + paddingX, y + h - paddingY);
+  ctx.fillText(text, nx + paddingX, ny + h - paddingY);
 }
 
 function clear(){
@@ -547,7 +775,14 @@ function frame(ts){
       planIfNeeded(ts);
       stepAlongPath(dt);
       updateRobotAnimation(dt);
+      handleRobotDialogues();
     }
+  }
+  // process delayed guide show
+  if(guide.pendingShow && ts >= guide.showAtTimeMs){
+    guide.visible = true;
+    guide.timer = 0;
+    guide.pendingShow = false;
   }
   clear();
   drawGrid();
