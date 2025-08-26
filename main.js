@@ -304,7 +304,12 @@ function positionRobotAtHero(){
 
 window.addEventListener('load', positionRobotAtHero);
 window.addEventListener('resize', positionRobotAtHero);
-window.addEventListener('scroll', scheduleObstaclesRebuild);
+// Throttled scroll handler for mobile performance
+let scrollTimeout;
+window.addEventListener('scroll', () => {
+  clearTimeout(scrollTimeout);
+  scrollTimeout = setTimeout(scheduleObstaclesRebuild, 100);
+});
 
 // Replan at a limited rate
 let lastPlanTime = 0;
