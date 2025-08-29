@@ -1,0 +1,54 @@
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient for robot body -->
+    <linearGradient id="bodyGradientIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1b233d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0e152b;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Gradient for border -->
+    <linearGradient id="borderGradientIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6cf0ff;stop-opacity:0.35" />
+      <stop offset="100%" style="stop-color:#2eff8b;stop-opacity:0.35" />
+    </linearGradient>
+    
+    <!-- Glow effect for antenna LED -->
+    <radialGradient id="ledGlowIcon" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#2eff8b;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#2eff8b;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#2eff8b;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Robot body (rounded rectangle) -->
+  <rect x="8" y="12" width="24" height="16" rx="3" ry="3" fill="url(#bodyGradientIcon)" stroke="url(#borderGradientIcon)" stroke-width="1"/>
+  
+  <!-- Face panel -->
+  <rect x="10" y="14" width="20" height="12" rx="2" ry="2" fill="#0e152b"/>
+  
+  <!-- Eyes -->
+  <circle cx="15" cy="18" r="1.5" fill="#6cf0ff"/>
+  <circle cx="25" cy="18" r="1.5" fill="#6cf0ff"/>
+  
+  <!-- Status indicator (mouth) -->
+  <rect x="18" y="20" width="4" height="1" fill="#f36b6b"/>
+  
+  <!-- Antenna -->
+  <path d="M 20 12 Q 22 10 23 8" stroke="#6cf0ff" stroke-width="1" fill="none"/>
+  
+  <!-- Antenna LED with glow -->
+  <circle cx="23" cy="8" r="2" fill="url(#ledGlowIcon)"/>
+  <circle cx="23" cy="8" r="1" fill="#2eff8b"/>
+  
+  <!-- Wheels -->
+  <circle cx="12" cy="28" r="2" fill="#0b1020" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <circle cx="28" cy="28" r="2" fill="#0b1020" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  
+  <!-- Wheel spokes -->
+  <g stroke="rgba(108,240,255,0.6)" stroke-width="1">
+    <line x1="12" y1="28" x2="12" y2="26"/>
+    <line x1="12" y1="28" x2="12" y2="30"/>
+    <line x1="28" y1="28" x2="28" y2="26"/>
+    <line x1="28" y1="28" x2="28" y2="30"/>
+  </g>
+</svg>

@@ -1,147 +1,98 @@
-# My Portfolio Website
 
-A modern, responsive portfolio website built with HTML, CSS, and JavaScript. This project demonstrates clean code practices, responsive design, and modern web development techniques.
+## <img src="robot-icon.svg" width="32" height="32" alt="Robot Icon" style="vertical-align: middle; margin-right: 8px;"> Interactive Robotics Portfolio
 
-## 🚀 Features
+An interactive, robotics‑themed portfolio site featuring a canvas‑rendered robot guide that performs real‑time A* path planning, follows your cursor/touch, and avoids obstacles ( from the live DOM layout ). 
 
-- **Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
-- **Modern UI/UX**: Clean, professional design with smooth animations
-- **Interactive Elements**: Smooth scrolling, mobile navigation, and form handling
-- **Performance Optimized**: Fast loading with optimized assets
-- **SEO Friendly**: Semantic HTML structure and meta tags
+### Demo
+- Open `index.html` locally in a browser, or host the folder on any static server.
 
-## 🛠️ Technologies Used
+### Features
+- **Real‑time path planning**: A* on a grid with line‑of‑sight shortcutting and Chaikin smoothing. 
+- **Dynamic obstacle map**: Obstacles are rebuilt from page content (headings, text, buttons, images), so the robot navigates around actual layout.
+- **Contextual dialogue**: Short hints that trigger near sections like Skills, Projects, Academic Projects and Contact.
 
-- **HTML5**: Semantic markup and modern structure
-- **CSS3**: Flexbox, Grid, animations, and responsive design
-- **JavaScript**: ES6+ features, DOM manipulation, and event handling
-- **Font Awesome**: Icons for enhanced visual appeal
-- **Google Fonts**: Inter font family for typography
+### Controls & interaction
+- Move your mouse or tap/drag on touch devices: the robot plans a path and follows the target while avoiding page content.
+- The compass arrow in the "Interactive Portfolio Webpage" project points toward the robot.
 
-## 📁 Project Structure
+## Path Planning and Following
 
-```
-portfolio/
-├── index.html          # Main HTML file
-├── styles.css          # CSS styles and responsive design
-├── script.js           # JavaScript functionality
-└── README.md           # Project documentation
-```
+The robot uses multi-stage path planning and execution system:
 
-## 🎨 Design Features
+#### 1. Grid-Based A* Pathfinding
+- **Grid Representation**: The world is discretized into a 24×24 pixel grid where each cell is either free (0) or occupied (1)
+- **Heuristic Function**: Manhattan distance for admissible heuristic
+  ```
+  h(a,b) = |aₓ - bₓ| + |aᵧ - bᵧ|
+  ```
+- **Cost Function**: Uniform cost of 1 per grid cell movement
+- **Neighborhood**: 4-connected (up, down, left, right) for computational efficiency
 
-- **Hero Section**: Eye-catching introduction with call-to-action buttons
-- **About Section**: Personal information and skills showcase
-- **Projects Section**: Portfolio of work with technology tags
-- **Contact Section**: Contact form and social media links
-- **Responsive Navigation**: Mobile-friendly hamburger menu
+#### 2. Path Smoothing Pipeline
+**Line-of-Sight Shortcutting**:
+- Iteratively removes unnecessary waypoints by checking direct visibility
+- Uses ray-marching with step size of `cellSize/2` for collision detection
+- Reduces path length while maintaining obstacle avoidance
 
-## 🚀 Getting Started
+**Chaikin Smoothing**:
+- Applies one iteration of Chaikin's corner-cutting algorithm
+- For each pair of consecutive points (p₀, p₁), creates two new points:
+  ```
+  q = 0.25 × p₀ + 0.75 × p₁
+  r = 0.75 × p₀ + 0.25 × p₁
+  ```
+- Results in smoother, more natural robot motion
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/yourusername/portfolio.git
-   cd portfolio
-   ```
+#### 3. Motion Control System
+**Arrival Steering**:
+- Uses proportional control with arrival radius for smooth deceleration
+- Desired velocity calculation:
+  ```
+  v_desired = min(v_max, distance_to_target / slow_radius) × unit_vector_to_target
+  ```
+- Slow radius: 100 pixels for gradual deceleration
 
-2. **Open in your browser**:
-   - Simply open `index.html` in your web browser
-   - Or use a local server for development
+**Acceleration Control**:
+- Implements acceleration-limited steering
+- Steering force: `F = v_desired - v_current`
+- Clamped to maximum acceleration: `|F| ≤ a_max`
+- Integration: `v(t+dt) = v(t) + F × dt`
 
-3. **Customize the content**:
-   - Update personal information in `index.html`
-   - Modify colors and styling in `styles.css`
-   - Add your own projects and skills
+**Collision Resolution**:
+- Circle-rectangle collision detection with penetration depth
+- Push-out force: `F_push = (radius - penetration) × normal_vector`
+- Velocity cancellation: `v_new = v_old - (v_old · normal) × normal`
 
-## 📱 Responsive Breakpoints
+#### 4. Real-time Adaptation
+- **Dynamic Obstacle Mapping**: Rebuilds obstacle grid from DOM elements every 100ms during scroll
+- **Replanning**: A* executed every 80ms for moving targets
+- **Path Following**: Robot follows smoothed waypoints with look-ahead for continuous motion
 
-- **Desktop**: 1200px and above
-- **Tablet**: 768px - 1199px
-- **Mobile**: Below 768px
+#### 5. Performance Optimizations
+- **Grid Caching**: Obstacle grid rebuilt only when layout changes
+- **Path Caching**: Smooth path points computed once per A* solution
+- **Throttled Updates**: Motion and planning updates limited to prevent frame drops
 
-## 🎯 Customization Guide
+### Configuration (in `main.js`)
+- **Grid cell size**: `const cellSize = 24;`
+- **Robot motion limits**: `robot.maxSpeed`, `robot.maxAccel`, `robot.radius`.
+- **Initial pause**: `robot.freezeTimer` is set in `positionRobotAtHero()`.
+- **Replan cadence**: `planIntervalMs` (lower = more responsive, higher = fewer computations).
+- **Obstacle sources**: CSS selector list in `rebuildObstaclesFromDOM()`.
 
-### Personal Information
-Update the following sections in `index.html`:
-- Your name in the hero section
-- About me description
-- Skills and technologies
-- Project details and links
-- Contact information
+Adjust these values to tune performance and feel. Smaller `cellSize` yields finer navigation but higher CPU usage.
 
-### Styling
-Modify `styles.css` to change:
-- Color scheme (primary colors, gradients)
-- Typography (fonts, sizes, weights)
-- Layout spacing and dimensions
-- Animation effects
+### Robot Design
 
-### Functionality
-Enhance `script.js` with:
-- Additional animations
-- Form submission handling
-- Analytics integration
-- Performance optimizations
+The robot guide features a sleek, minimalist design with smooth animations:
 
-## 🌐 Deployment
+![Robot Guide J-0015](robot-guide.svg)
 
-### GitHub Pages (Recommended)
-1. Push your code to GitHub
-2. Go to repository Settings > Pages
-3. Select source branch (usually `main` or `master`)
-4. Your site will be available at `https://yourusername.github.io/portfolio`
+**Features**:
+- **HELLA CUTE**
+- **Body**: Rounded rectangle with gradient border
+- **Face Panel**: Dark panel with cyan eyes and red status indicator
+- **Antenna**: Animated LED that pulses with robot's movement
+- **Wheels**: Static circular wheels with spoke design
+- **Animations**: Gentle bobbing motion, blinking eyes, and smooth steering
 
-### Other Hosting Options
-- **Netlify**: Drag and drop deployment
-- **Vercel**: Connect your GitHub repository
-- **Firebase Hosting**: Google's hosting solution
-
-## 🔧 Development
-
-### Local Development Server
-```bash
-# Using Python
-python -m http.server 8000
-
-# Using Node.js
-npx serve .
-
-# Using PHP
-php -S localhost:8000
-```
-
-### Code Quality
-- Use a code formatter (Prettier)
-- Validate HTML with W3C validator
-- Test across different browsers
-- Optimize images and assets
-
-## 📈 Performance Tips
-
-- Optimize images (use WebP format)
-- Minify CSS and JavaScript for production
-- Enable Gzip compression
-- Use a CDN for external resources
-- Implement lazy loading for images
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 📞 Contact
-
-- **Email**: your.email@example.com
-- **GitHub**: [@yourusername](https://github.com/yourusername)
-- **LinkedIn**: [Your Name](https://linkedin.com/in/yourusername)
-
----
-
-**Happy Coding! 🎉**
