@@ -1,4 +1,4 @@
-## Interactive Robotics Portfolio
+## <img src="robot-icon.svg" width="32" height="32" alt="Robot Icon" style="vertical-align: middle; margin-right: 8px;"> Interactive Robotics Portfolio
 
 An interactive, robotics‑themed portfolio site featuring a canvas‑rendered robot guide that performs real‑time A* path planning, follows your cursor/touch, and avoids obstacles ( from the live DOM layout ). 
 
@@ -6,7 +6,7 @@ An interactive, robotics‑themed portfolio site featuring a canvas‑rendered r
 - Open `index.html` locally in a browser, or host the folder on any static server.
 
 ### Features
-- **Real‑time path planning**: A* on a grid with line‑of‑sight shortcutting and Chaikin smoothing. **HELLA CUTE**
+- **Real‑time path planning**: A* on a grid with line‑of‑sight shortcutting and Chaikin smoothing. 
 - **Dynamic obstacle map**: Obstacles are rebuilt from page content (headings, text, buttons, images), so the robot navigates around actual layout.
 - **Contextual dialogue**: Short hints that trigger near sections like Skills, Projects, Academic Projects and Contact.
 
@@ -14,7 +14,7 @@ An interactive, robotics‑themed portfolio site featuring a canvas‑rendered r
 - Move your mouse or tap/drag on touch devices: the robot plans a path and follows the target while avoiding page content.
 - The compass arrow in the "Interactive Portfolio Webpage" project points toward the robot.
 
-### Path Planning and Following
+## Path Planning and Following
 
 The robot uses multi-stage path planning and execution system:
 
@@ -88,6 +88,7 @@ The robot guide features a sleek, minimalist design with smooth animations:
 ![Robot Guide J-0015](robot-guide.svg)
 
 **Features**:
+- **HELLA CUTE**
 - **Body**: Rounded rectangle with gradient border
 - **Face Panel**: Dark panel with cyan eyes and red status indicator
 - **Antenna**: Animated LED that pulses with robot's movement
