@@ -30,7 +30,8 @@ body{
   width:100%;
   height:100%;
   display:block;
-  z-index:-1;
+  z-index:1;
+  pointer-events:none;
 }
 
 .site-header{display:none}
@@ -54,6 +55,7 @@ body{
 .card:hover{border-color:transparent}
 .project{padding:12px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,0.02)}
 .project-thumb{width:100%;height:220px;object-fit:cover;display:block;border-radius:8px;margin-top:8px;border:1px solid var(--stroke)}
+.project-arrow{width:100%;height:220px;display:flex;align-items:center;justify-content:center;border-radius:8px;margin-top:8px;border:1px solid var(--stroke);background:rgba(255,255,255,0.02)}
 .project-title{display:flex;align-items:center;justify-content:center;gap:8px}
 .project-title h3{margin:0}
 .project-link{color:#6cf0ffa4;text-decoration:none;display:inline-flex;align-items:center}

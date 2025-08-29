@@ -8,6 +8,17 @@ const ctx = canvas.getContext('2d');
 
 const DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
 let width = 0, height = 0;
+
+// Always start at the top on refresh/navigation restore
+if('scrollRestoration' in history){
+  history.scrollRestoration = 'manual';
+}
+window.addEventListener('load', ()=>{
+  window.scrollTo(0, 0);
+});
+window.addEventListener('pageshow', (e)=>{
+  if(e.persisted){ window.scrollTo(0, 0); }
+});
 function docSize(){
   const de = document.documentElement;
   const b = document.body;
@@ -222,6 +233,9 @@ let robot = {
     bobPhase: 0
   }
 };
+// Smoothed path in world-space points, separate from grid cells
+robot.pathPoints = [];
+robot.pathPointIndex = 0;
 // Collision dialogue state
 const collisionDialogues = [
   'Ouch !!',
@@ -235,6 +249,11 @@ let lastSkillsDialogueTimeMs = 0;
 let hasShownSkillsDialogue = false;
 let lastProjectsDialogueTimeMs = 0;
 let hasShownProjectsDialogue = false;
+let lastAcademicProjectsDialogueTimeMs = 0;
+let hasShownAcademicProjectsDialogue = false;
+let lastContactDialogueTimeMs = 0;
+let hasShownContactDialogue = false;
+let iosNoticeShown = false;
 
 
 // Guide caption next to the robot
@@ -249,13 +268,59 @@ const guide = {
   stickToAnchor: false,
   // delayed show support
   pendingShow: false,
-  showAtTimeMs: 0
+  showAtTimeMs: 0,
+  // when set, other dialogues (e.g., wait-for-me, collisions) must not interrupt until this time
+  contextualLockUntilMs: 0
 };
+
+function isIOS(){
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  const touchMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  return /iPad|iPhone|iPod/.test(ua) || touchMac;
+}
+
+function showIOSBanner(){
+  if(document.getElementById('ios-guide-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'ios-guide-banner';
+  banner.textContent = 'Sorry, the guide is not competible with IOS devices yet.';
+  banner.setAttribute('role', 'status');
+  banner.style.position = 'fixed';
+  banner.style.top = '8px';
+  banner.style.left = '50%';
+  banner.style.transform = 'translateX(-50%)';
+  banner.style.maxWidth = '92%';
+  banner.style.zIndex = '9999';
+  banner.style.background = 'rgba(11,16,32,0.96)';
+  banner.style.border = '1px solid rgba(108,240,255,0.35)';
+  banner.style.color = '#e7ebff';
+  banner.style.padding = '10px 14px';
+  banner.style.borderRadius = '10px';
+  banner.style.boxShadow = '0 4px 16px rgba(0,0,0,0.3)';
+  banner.style.font = '14px Inter, system-ui, sans-serif';
+  banner.style.pointerEvents = 'none';
+  document.body.appendChild(banner);
+  setTimeout(()=>{ banner.remove(); }, 4500);
+}
 
 let mouse = {x: null, y: null};
 window.addEventListener('pointermove', (e)=>{
   mouse.x = e.pageX; mouse.y = e.pageY;
 });
+// Ensure target updates on iOS/touch as well
+window.addEventListener('pointerdown', (e)=>{
+  mouse.x = e.pageX; mouse.y = e.pageY;
+});
+window.addEventListener('touchstart', (e)=>{
+  const t = e.touches && e.touches[0];
+  if(!t) return;
+  mouse.x = t.pageX; mouse.y = t.pageY;
+}, {passive:true});
+window.addEventListener('touchmove', (e)=>{
+  const t = e.touches && e.touches[0];
+  if(!t) return;
+  mouse.x = t.pageX; mouse.y = t.pageY;
+}, {passive:true});
 
 // Build initial obstacle map after first layout
 function scheduleObstaclesRebuild(){
@@ -284,15 +349,23 @@ function positionRobotAtHero(){
     robot.x = window.innerWidth * 0.5; // center horizontally
     robot.y = window.innerHeight - 100; // near bottom of screen
   } else {
-    // On desktop: position to the right of hero text
-    robot.x = right - 500;
-    robot.y = top + (bottom - top) * 0.5;
+    // On desktop: position near the hero, but clamp within visible viewport
+    const viewportLeft = window.scrollX;
+    const viewportTop = window.scrollY;
+    const viewportRight = viewportLeft + Math.min(window.innerWidth, document.documentElement.clientWidth);
+    const viewportBottom = viewportTop + Math.min(window.innerHeight, document.documentElement.clientHeight);
+    const horizontalOffset = Math.min(280, Math.max(160, (viewportRight - viewportLeft) * 0.35));
+    const desiredX = right + 24 - horizontalOffset; // to the right of hero, adaptive offset
+    const desiredY = top + (bottom - top) * 0.5;
+    const margin = 60; // keep a safe margin from edges so it's on-screen
+    robot.x = clamp(desiredX, viewportLeft + margin, viewportRight - margin);
+    robot.y = clamp(desiredY, viewportTop + margin, viewportBottom - margin);
   }
   
   robot.vx = 0; robot.vy = 0;
   robot.path = []; // Clear any existing path
   robot.pathIndex = 0;
-  robot.freezeTimer = 3; // stay for 3 seconds on spawn
+  robot.freezeTimer = 1; // stay for 1 second on spawn
   // schedule guide to appear after 1.5s
   guide.text = 'and I am J-0015, your guide';
   guide.visible = false;
@@ -300,6 +373,19 @@ function positionRobotAtHero(){
   guide.durationSec = 3.2; // slightly longer for intro
   guide.pendingShow = true;
   guide.showAtTimeMs = performance.now() + 1500;
+  // After the guide appears, show iOS compatibility banner once
+  if(isIOS() && !iosNoticeShown){
+    iosNoticeShown = true;
+    const fireAt = guide.showAtTimeMs + 400; // slightly after the guide shows
+    const tick = ()=>{
+      if(performance.now() >= fireAt){
+        showIOSBanner();
+      } else {
+        requestAnimationFrame(tick);
+      }
+    };
+    requestAnimationFrame(tick);
+  }
 }
 
 window.addEventListener('load', positionRobotAtHero);
@@ -323,7 +409,11 @@ window.addEventListener('resize', () => {
 let scrollTimeout;
 window.addEventListener('scroll', () => {
   clearTimeout(scrollTimeout);
-  scrollTimeout = setTimeout(scheduleObstaclesRebuild, 100);
+  scrollTimeout = setTimeout(()=>{
+    scheduleObstaclesRebuild();
+    // Nudge planning on iOS after scroll changes target position relative to content
+    lastPlanTime = 0; // force immediate plan on next frame
+  }, 100);
 });
 
 // Replan at a limited rate
@@ -332,29 +422,31 @@ let planIntervalMs = 80; // faster replanning to follow moving targets
 
 function planIfNeeded(ts){
   if(ts - lastPlanTime < planIntervalMs) return;
-  if(mouse.x === null || mouse.y === null) return; // Wait for first mouse movement
+  // On iOS after scroll, there may be no new pointermove; keep goal tied to last known touch
+  if(mouse.x === null || mouse.y === null) return; // Wait for first input at least once
   lastPlanTime = ts;
   const start = worldToGrid(robot.x, robot.y);
   const goal = worldToGrid(mouse.x, mouse.y);
   const p = findPath(start, goal);
   if(p.length){
-    // pick closest waypoint on new path to continue smoothly
-    let closestIdx = 0;
-    let bestDist = Infinity;
-    for(let i=0;i<p.length;i++){
-      const wx = (p[i].c + 0.5) * cellSize;
-      const wy = (p[i].r + 0.5) * cellSize;
-      const d = Math.hypot(wx - robot.x, wy - robot.y);
+    // Grid path
+    robot.path = p;
+    // Build smoothed world-space path and choose next index near current pos
+    robot.pathPoints = buildSmoothedPathPoints(p);
+    let closestIdx = 0; let bestDist = Infinity;
+    for(let i=0;i<robot.pathPoints.length;i++){
+      const wp = robot.pathPoints[i];
+      const d = Math.hypot(wp.x - robot.x, wp.y - robot.y);
       if(d < bestDist){ bestDist = d; closestIdx = i; }
     }
-    robot.path = p;
-    // Lookahead to the next waypoint, if available
-    robot.pathIndex = Math.min(closestIdx + 1, Math.max(closestIdx, p.length - 1));
+    // small lookahead to keep motion flowing
+    robot.pathPointIndex = Math.min(closestIdx + 1, Math.max(closestIdx, robot.pathPoints.length - 1));
   }
 }
 
 function stepAlongPath(dt){
-  if(!robot.path.length){
+  const usingPoints = robot.pathPoints && robot.pathPoints.length > 0;
+  if(!usingPoints && !robot.path.length){
     // natural slow down when no target
     robot.vx *= Math.pow(0.0001, dt);
     robot.vy *= Math.pow(0.0001, dt);
@@ -364,17 +456,24 @@ function stepAlongPath(dt){
     return;
   }
 
-  // target is next waypoint center
-  const idx = clamp(robot.pathIndex, 0, robot.path.length-1);
-  const cell = robot.path[idx];
-  const tx = (cell.c + 0.5) * cellSize;
-  const ty = (cell.r + 0.5) * cellSize;
+  // target is next smoothed waypoint (fall back to cell center)
+  let tx, ty;
+  if(usingPoints){
+    const idx = clamp(robot.pathPointIndex, 0, robot.pathPoints.length - 1);
+    const wp = robot.pathPoints[idx];
+    tx = wp.x; ty = wp.y;
+  } else {
+    const idx = clamp(robot.pathIndex, 0, robot.path.length-1);
+    const cell = robot.path[idx];
+    tx = (cell.c + 0.5) * cellSize;
+    ty = (cell.r + 0.5) * cellSize;
+  }
 
   // arrival steering
   const toTargetX = tx - robot.x;
   const toTargetY = ty - robot.y;
   const dist = Math.hypot(toTargetX, toTargetY);
-  const slowRadius = 80; // start slowing down when within this distance
+  const slowRadius = 100; // start slowing down a bit earlier
   const desiredSpeed = dist < slowRadius ? robot.maxSpeed * (dist / slowRadius) : robot.maxSpeed;
   const dirX = dist > 0 ? toTargetX / dist : 0;
   const dirY = dist > 0 ? toTargetY / dist : 0;
@@ -407,10 +506,16 @@ function stepAlongPath(dt){
   resolveRobotCollisions();
 
   // advance waypoint when close enough
-  if(dist <= Math.max(6, robot.maxSpeed * dt)){
-    robot.x = tx; robot.y = ty;
-    if(robot.pathIndex < robot.path.length - 1){
-      robot.pathIndex++;
+  if(dist <= Math.max(8, robot.maxSpeed * dt)){
+    if(usingPoints){
+      if(robot.pathPointIndex < robot.pathPoints.length - 1){
+        robot.pathPointIndex++;
+      }
+    } else {
+      robot.x = tx; robot.y = ty;
+      if(robot.pathIndex < robot.path.length - 1){
+        robot.pathIndex++;
+      }
     }
   }
 }
@@ -480,11 +585,13 @@ function resolveRobotCollisions(){
   // Trigger dialogue with cooldown when collision occurs
   if(collisionThisFrame){
     const now = Date.now();
-    if(now - lastCollisionDialogueTimeMs > 15000){
+    const locked = guide.contextualLockUntilMs && performance.now() < guide.contextualLockUntilMs;
+    if(now - lastCollisionDialogueTimeMs > 15000 && (!guide.visible || guide.timer < 0.5) && !locked){
       guide.text = collisionDialogues[collisionDialogueIndex];
       guide.visible = true;
       guide.stickToAnchor = false; // show near robot
       guide.timer = 0;
+      guide.durationSec = 1.2; // shorter duration for collision messages
       collisionDialogueIndex = (collisionDialogueIndex + 1) % collisionDialogues.length;
       lastCollisionDialogueTimeMs = now;
     }
@@ -511,7 +618,11 @@ function updateRobotAnimation(dt){
   if(guide.visible){
     guide.timer += dt;
     // keep visible for a shorter duration
-    if(guide.timer > (guide.durationSec || 1.8)){ guide.visible = false; }
+    if(guide.timer > (guide.durationSec || 1.8)){
+      guide.visible = false;
+      // clear contextual lock once the dialogue has completed
+      guide.contextualLockUntilMs = 0;
+    }
   }
 }
 
@@ -529,23 +640,15 @@ function handleRobotDialogues(){
     robot.y > viewportBottom
   );
 
-  if(isOffscreen){
-    // Determine nearest edge point where the robot "leaves" the screen
+  // Only show "Wait for me" if robot is off-screen at top or bottom, not sideways
+  const isOffscreenTopBottom = robot.y < viewportTop || robot.y > viewportBottom;
+  
+  if(isOffscreenTopBottom){
+    // Determine nearest edge point where the robot "leaves" the screen (only top/bottom)
     let ax = robot.x;
     let ay = robot.y;
     let minDist = Infinity;
-    // left edge
-    if(robot.x < viewportLeft){
-      const cy = clamp(robot.y, viewportTop + 20, viewportBottom - 60);
-      const d = Math.abs(viewportLeft - robot.x);
-      if(d < minDist){ minDist = d; ax = viewportLeft + 12; ay = cy; }
-    }
-    // right edge
-    if(robot.x > viewportRight){
-      const cy = clamp(robot.y, viewportTop + 20, viewportBottom - 60);
-      const d = Math.abs(robot.x - viewportRight);
-      if(d < minDist){ minDist = d; ax = viewportRight - Math.min(180, (viewportRight - viewportLeft) * 0.4); ay = cy; }
-    }
+    
     // top edge
     if(robot.y < viewportTop){
       const cx = clamp(robot.x, viewportLeft + 20, viewportRight - Math.min(180, (viewportRight - viewportLeft) * 0.4));
@@ -559,11 +662,16 @@ function handleRobotDialogues(){
       if(d < minDist){ minDist = d; ax = cx; ay = viewportBottom - 60; }
     }
 
-    guide.text = 'Wait for me!!!';
-    guide.visible = true;
-    guide.stickToAnchor = true;
-    guide.anchorX = ax;
-    guide.anchorY = ay;
+    // Only show "Wait for me" if no other dialogue is currently active
+    const nowMs = performance.now();
+    const locked = guide.contextualLockUntilMs && nowMs < guide.contextualLockUntilMs;
+    if((!guide.visible || guide.timer < 0.5) && !locked){
+      guide.text = 'Wait for me!!!';
+      guide.visible = true;
+      guide.stickToAnchor = true;
+      guide.anchorX = ax;
+      guide.anchorY = ay;
+    }
   } else {
     // Restore to normal on-screen behavior
     guide.stickToAnchor = false;
@@ -589,6 +697,7 @@ function handleRobotDialogues(){
           guide.timer = 0;
           guide.durationSec = 4.5; // longer display for this message
           guide.stickToAnchor = false; // show near robot
+          guide.contextualLockUntilMs = performance.now() + guide.durationSec * 1000;
           lastSkillsDialogueTimeMs = now;
           hasShownSkillsDialogue = true; // only once
         }
@@ -609,18 +718,70 @@ function handleRobotDialogues(){
       if(dist < 180){
         const now = Date.now();
         if(!hasShownProjectsDialogue && (now - lastProjectsDialogueTimeMs > 25000)){
-          guide.text = 'Press icon next to titles to learn more about projects';
+          guide.text = 'Press icon next to titles to find out more about projects';
           guide.visible = true;
           guide.timer = 0;
           guide.durationSec = 5.0; // longer display for projects hint
           guide.stickToAnchor = false;
+          guide.contextualLockUntilMs = performance.now() + guide.durationSec * 1000;
           lastProjectsDialogueTimeMs = now;
           hasShownProjectsDialogue = true; // only once
         }
       }
     };
     showProjectsHintIfNear(document.getElementById('projects'));
-    showProjectsHintIfNear(document.getElementById('academic-projects'));
+    
+    // Academic Projects specific dialogue
+    const academicProjectsEl = document.getElementById('academic-projects');
+    if(academicProjectsEl){
+      const r = academicProjectsEl.getBoundingClientRect();
+      const left = r.left + window.scrollX;
+      const top = r.top + window.scrollY;
+      const right = r.right + window.scrollX;
+      const bottom = r.bottom + window.scrollY;
+      const dx = (robot.x < left) ? left - robot.x : (robot.x > right) ? robot.x - right : 0;
+      const dy = (robot.y < top) ? top - robot.y : (robot.y > bottom) ? robot.y - bottom : 0;
+      const dist = Math.hypot(dx, dy);
+      if(dist < 160){
+        const now = Date.now();
+        if(!hasShownAcademicProjectsDialogue && (now - lastAcademicProjectsDialogueTimeMs > 30000)){
+          guide.text = 'Entering project bay… brace yourself for cool stuff!';
+          guide.visible = true;
+          guide.timer = 0;
+          guide.durationSec = 4.0;
+          guide.stickToAnchor = false;
+          guide.contextualLockUntilMs = performance.now() + guide.durationSec * 1000;
+          lastAcademicProjectsDialogueTimeMs = now;
+          hasShownAcademicProjectsDialogue = true;
+        }
+      }
+    }
+    
+    // Contact section dialogue
+    const contactEl = document.getElementById('contact');
+    if(contactEl){
+      const r = contactEl.getBoundingClientRect();
+      const left = r.left + window.scrollX;
+      const top = r.top + window.scrollY;
+      const right = r.right + window.scrollX;
+      const bottom = r.bottom + window.scrollY;
+      const dx = (robot.x < left) ? left - robot.x : (robot.x > right) ? robot.x - right : 0;
+      const dy = (robot.y < top) ? top - robot.y : (robot.y > bottom) ? robot.y - bottom : 0;
+      const dist = Math.hypot(dx, dy);
+      if(dist < 160){
+        const now = Date.now();
+        if(!hasShownContactDialogue && (now - lastContactDialogueTimeMs > 30000)){
+          guide.text = 'Almost the exit… but wait, you can reach out here.';
+          guide.visible = true;
+          guide.timer = 0;
+          guide.durationSec = 4.5;
+          guide.stickToAnchor = false;
+          guide.contextualLockUntilMs = performance.now() + guide.durationSec * 1000;
+          lastContactDialogueTimeMs = now;
+          hasShownContactDialogue = true;
+        }
+      }
+    }
   }
 }
 
@@ -647,17 +808,92 @@ function drawObstacles(){
 }
 
 function drawPath(){
-  if(!robot.path.length) return;
+  const pts = (robot.pathPoints && robot.pathPoints.length) ? robot.pathPoints : null;
+  if(!pts) return;
   ctx.strokeStyle = 'rgba(60, 119, 125, 0.9)';
   ctx.lineWidth = 3;
   ctx.beginPath();
-  for(let i=0;i<robot.path.length;i++){
-    const cell = robot.path[i];
-    const x = (cell.c + 0.5) * cellSize;
-    const y = (cell.r + 0.5) * cellSize;
+  for(let i=0;i<pts.length;i++){
+    const x = pts[i].x;
+    const y = pts[i].y;
     if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
   }
   ctx.stroke();
+}
+
+// ---- Path smoothing helpers ----
+function cellCenter(cell){
+  return {x: (cell.c + 0.5) * cellSize, y: (cell.r + 0.5) * cellSize};
+}
+
+function hasLineOfSight(ax, ay, bx, by){
+  const dx = bx - ax;
+  const dy = by - ay;
+  const len = Math.hypot(dx, dy);
+  if(len === 0) return true;
+  const steps = Math.max(2, Math.ceil(len / (cellSize * 0.5)));
+  for(let i=1;i<steps;i++){
+    const t = i / steps;
+    const sx = ax + dx * t;
+    const sy = ay + dy * t;
+    const g = worldToGrid(sx, sy);
+    if(grid.nodes[g.r][g.c] === 1) return false;
+  }
+  return true;
+}
+
+function shortcutPath(points){
+  if(points.length <= 2) return points.slice();
+  const res = [];
+  let i = 0;
+  res.push(points[0]);
+  while(i < points.length - 1){
+    let j = points.length - 1;
+    let found = i + 1;
+    while(j > i + 1){
+      if(hasLineOfSight(points[i].x, points[i].y, points[j].x, points[j].y)){
+        found = j; break;
+      }
+      j--;
+    }
+    res.push(points[found]);
+    i = found;
+  }
+  return res;
+}
+
+function chaikinSmooth(points){
+  if(points.length < 3) return points.slice();
+  const out = [];
+  out.push(points[0]);
+  for(let i=0;i<points.length-1;i++){
+    const p0 = points[i];
+    const p1 = points[i+1];
+    const q = {x: lerp(p0.x, p1.x, 0.25), y: lerp(p0.y, p1.y, 0.25)};
+    const r = {x: lerp(p0.x, p1.x, 0.75), y: lerp(p0.y, p1.y, 0.75)};
+    out.push(q, r);
+  }
+  out.push(points[points.length-1]);
+  return out;
+}
+
+function buildSmoothedPathPoints(cells){
+  // Convert grid cells to world points
+  const raw = cells.map(cellCenter);
+  // Greedy line-of-sight shortcutting
+  const shortcut = shortcutPath(raw);
+  // One iteration of Chaikin for curvature
+  const curved = chaikinSmooth(shortcut);
+  // Optional: cap number of points
+  if(curved.length > 200){
+    // downsample
+    const step = Math.ceil(curved.length / 200);
+    const ds = [];
+    for(let i=0;i<curved.length;i+=step) ds.push(curved[i]);
+    if(ds[ds.length-1] !== curved[curved.length-1]) ds.push(curved[curved.length-1]);
+    return ds;
+  }
+  return curved;
 }
 
 function drawRobot(){
@@ -719,6 +955,19 @@ function drawRobot(){
     drawBubble(cx + 30, cy - 24, guide.text);
     }
   }
+
+  // Update project arrow compass to point toward the robot
+  const arrowWrap = document.getElementById('project-arrow');
+  const arrowNeedle = document.getElementById('project-arrow-needle');
+  if(arrowWrap && arrowNeedle){
+    const rect = arrowWrap.getBoundingClientRect();
+    const centerX = rect.left + window.scrollX + rect.width/2;
+    const centerY = rect.top + window.scrollY + rect.height/2;
+    const dx = cx - centerX;
+    const dy = cy - centerY;
+    const angleDeg = Math.atan2(dy, dx) * 180 / Math.PI - 70 + 90; // calibrate + 90° CCW
+    arrowNeedle.setAttribute('transform', `translate(15,15) rotate(${angleDeg} 35 35)`);
+  }
 }
 
 function roundRect(ctx, x, y, w, h, r){
@@ -776,12 +1025,15 @@ function drawBubble(x, y, text){
   const margin = 8;
   const nx = clamp(x, viewportLeft + margin, Math.max(viewportLeft + margin, viewportRight - w - margin));
   const ny = clamp(y, viewportTop + margin, Math.max(viewportTop + margin, viewportBottom - h - margin));
-  ctx.fillStyle = 'rgba(11,16,32,0.92)';
-  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-  ctx.lineWidth = 1.5;
+  
+  // Draw bubble with higher opacity and stronger border for better visibility
+  ctx.fillStyle = 'rgba(11,16,32,0.95)';
+  ctx.strokeStyle = 'rgba(108,240,255,0.4)';
+  ctx.lineWidth = 2;
   roundRect(ctx, nx, ny, w, h, 8);
   ctx.fill();
   ctx.stroke();
+  
   // tail
   ctx.beginPath();
   ctx.moveTo(nx - 6, ny + h*0.7);
@@ -789,8 +1041,9 @@ function drawBubble(x, y, text){
   ctx.lineTo(nx, ny + h*0.85);
   ctx.closePath();
   ctx.fill();
-  // text
-  ctx.fillStyle = '#e7ebff';
+  
+  // text with better contrast
+  ctx.fillStyle = '#ffffff';
   ctx.fillText(text, nx + paddingX, ny + h - paddingY);
 }
 
