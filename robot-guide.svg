@@ -1,0 +1,63 @@
+<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient for robot body -->
+    <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1b233d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0e152b;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Gradient for border -->
+    <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6cf0ff;stop-opacity:0.35" />
+      <stop offset="100%" style="stop-color:#2eff8b;stop-opacity:0.35" />
+    </linearGradient>
+    
+    <!-- Glow effect for antenna LED -->
+    <radialGradient id="ledGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#2eff8b;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#2eff8b;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#2eff8b;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="200" height="150" fill="#0b1020"/>
+  
+  <!-- Robot body (rounded rectangle) -->
+  <rect x="60" y="70" width="80" height="50" rx="10" ry="10" fill="url(#bodyGradient)" stroke="url(#borderGradient)" stroke-width="2"/>
+  
+  <!-- Face panel -->
+  <rect x="66" y="76" width="68" height="36" rx="6" ry="6" fill="#0e152b"/>
+  
+  <!-- Eyes -->
+  <circle cx="85" cy="90" r="4" fill="#6cf0ff"/>
+  <circle cx="115" cy="90" r="4" fill="#6cf0ff"/>
+  
+  <!-- Status indicator (mouth) -->
+  <rect x="96" y="96" width="8" height="3" fill="#f36b6b"/>
+  
+  <!-- Antenna -->
+  <path d="M 100 70 Q 106 62 110 56" stroke="#6cf0ff" stroke-width="2" fill="none"/>
+  
+  <!-- Antenna LED with glow -->
+  <circle cx="110" cy="56" r="8" fill="url(#ledGlow)"/>
+  <circle cx="110" cy="56" r="3" fill="#2eff8b"/>
+  
+  <!-- Wheels -->
+  <circle cx="70" cy="115" r="7" fill="#0b1020" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
+  <circle cx="130" cy="115" r="7" fill="#0b1020" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
+  
+  <!-- Wheel spokes -->
+  <g stroke="rgba(108,240,255,0.6)" stroke-width="2">
+    <line x1="70" y1="115" x2="70" y2="109"/>
+    <line x1="70" y1="115" x2="70" y2="121"/>
+    <line x1="130" y1="115" x2="130" y2="109"/>
+    <line x1="130" y1="115" x2="130" y2="121"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="100" y="20" text-anchor="middle" fill="#6cf0ff" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600">Robot Guide J-0015</text>
+  
+  <!-- Subtitle -->
+  <text x="100" y="40" text-anchor="middle" fill="#e7ebff" font-family="Inter, system-ui, sans-serif" font-size="12">Interactive Portfolio Assistant</text>
+</svg>
