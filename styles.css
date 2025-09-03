@@ -62,8 +62,8 @@ body{
 .project-link:hover{color:#8ff4ff}
 
 /* Headings */
-.section h2{margin:0 0 12px 0;font-size:22px;text-align:center}
-.section#hero h2{text-align:left}
+.section h2{margin:0 0 24px 0;font-size:48px;text-align:center;font-weight:800;color:var(--accent);text-shadow:0 0 20px rgba(108,240,255,0.3);letter-spacing:1px}
+.section#hero h2{text-align:left;font-size:64px;color:var(--fg);text-shadow:none;letter-spacing:0.5px}
 .section:not(#hero){text-align:center}
 .section:not(#hero) ul{margin-left:auto;margin-right:auto}
 .section:not(#hero) .skills{justify-content:center}
@@ -92,11 +92,11 @@ body{
 .skills li .badge{width:100%}
 
 .skills-categories{display:flex;flex-direction:column;gap:24px;margin:0;padding:0}
-.skill-category h3{margin:0 0 12px 0;font-size:18px;color:var(--fg);text-align:center}
+.skill-category h3{margin:0 0 12px 0;font-size:24px;font-weight:600;color:var(--fg);letter-spacing:0.3px;text-align:center}
 .skill-badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
 .skill-badges img{height:24px;width:auto}
 .projects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.project h3{margin:0 0 6px 0}
+.project h3{margin:0 0 12px 0;font-size:24px;font-weight:600;color:var(--fg);letter-spacing:0.3px}
 .project ul{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0 0;padding-left:0;justify-content:center;margin-top:auto}
 .project ul li{list-style:none;display:inline-flex;align-items:center;justify-content:center;padding:10px 12px;min-height:40px;border-radius:10px;border:1px solid var(--stroke);background:rgba(255,255,255,0.04);font-size:14px;text-align:center}
 .project .actions{margin-top:10px;justify-content:center}

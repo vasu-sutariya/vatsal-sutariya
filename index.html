@@ -22,16 +22,12 @@
       <section id="hero" class="section">
         <h2><span class="typewriter">Hi, I’m Vasu</span></h2>
         <p class="subtitle">Robotics Software Engineer</p>
-        <p>I create control/ visualization/ simulation software for robotics solutions.</p>
+        <p>I enjoy building robotics simulation/ monitoring/ control tools, approaching them much like creating GAMES: where logic, creativity and problem-solving come together to bring systems to life.</p>  
+        
         <div class="actions">
           <a class="btn btn-primary" href="#projects">View My Work</a>
           <a class="btn btn-ghost" href="#contact">Get In Touch</a>
         </div>
-      </section>
-
-      <section id="about" class="section">
-        <h2>About Me</h2>
-        <p>I enjoy building robotics software and simulations, approaching them much like creating GAMES: where logic, creativity and problem-solving come together to bring systems to life.</p>
       </section>
 
       <section id="skills" class="section">
@@ -39,16 +35,14 @@
         <div class="skills-categories">
 
           <div class="skill-category">
-            <h3>Tools & Frameworks</h3>
             <div class="skill-badges">
-              <img src="https://img.shields.io/badge/-Git-black?style=flat-square&logo=git" alt="Git">
+              <img src="https://img.shields.io/badge/Version%20Control%3A%20Git-black?style=flat-square&logo=git" alt="Version Control: Git">
               <img src="https://img.shields.io/badge/-Docker-black?style=flat-square&logo=docker" alt="Docker">
             </div>
           </div>
 
 
           <div class="skill-category">
-            <h3>Programming Languages</h3>
             <div class="skill-badges">
               <img src="https://img.shields.io/badge/-Python-black?style=flat-square&logo=python" alt="Python">
               <img src="https://img.shields.io/badge/-C++-black?style=flat-square&logo=c%2B%2B" alt="C++">
@@ -59,7 +53,6 @@
           </div>
           
           <div class="skill-category">
-            <h3>Robotics & Simulation</h3>
             <div class="skill-badges">
               <img src="https://img.shields.io/badge/-Unity-black?style=flat-square&logo=unity" alt="Unity">
               <img src="https://img.shields.io/badge/-ROS2-black?style=flat-square&logo=ros" alt="ROS2">
@@ -74,7 +67,6 @@
           
           
           <div class="skill-category">
-            <h3>Design & Modeling</h3>
             <div class="skill-badges">
               <img src="https://img.shields.io/badge/-Fusion%20360-black?style=flat-square&logo=autodesk" alt="Fusion 360">
               <img src="https://img.shields.io/badge/-Blender-black?style=flat-square&logo=blender" alt="Blender">
@@ -89,7 +81,7 @@
           <article class="project">
             <div class="project-title">
               <h3>URALIGHT</h3>
-              <a class="project-link" href="#" aria-label="Open project link" rel="noopener" target="_blank">
+              <a class="project-link" href="https://github.com/vasu-sutariya/Uralight" aria-label="Open project link" rel="noopener" target="_blank">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3z"/>
                   <path d="M5 5h6v2H7v10h10v-4h2v6H5V5z"/>
@@ -98,14 +90,14 @@
             </div>
             <ul class="project-bullets">
               <li>Unity-based software for manipulator robots</li>
-              <li>Environment building and motion planning</li>
-              <li>Simulation and customizable user interfaces</li>
+              <li>Environment building and motion planning with collision avoidance</li>
+              <li>Create custom user interfaces</li>
             </ul>
-            <img class="project-thumb" src="images/uralight-demo.gif" alt="URALIGHT demo animation" loading="lazy">
+            <img class="project-thumb" src="images/uralight.gif" alt="URALIGHT demo animation" loading="lazy">
             <ul>
               <li>Unity</li>
               <li>Motion Planning</li>
-              <li>UR Script</li>
+              <li>Universal Robots</li>
             </ul>
           </article>
           <article class="project">
@@ -121,7 +113,7 @@
             <ul class="project-bullets">
               <li>Canvas-rendered robot guide with A* path-planning</li>
               <li>Obstacle avoidance from live DOM layout</li>
-              <li>Responsive behavior across different platforms</li>
+              <li>Competible across different platforms</li>
             </ul>
             <div class="project-arrow" id="project-arrow" aria-hidden="true">
               <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -143,10 +135,11 @@
               <li>HTML • CSS • JS</li>
             </ul>
           </article>
+          
           <article class="project">
             <div class="project-title">
-              <h3>ROBOT NAVIGATOR</h3>
-              <a class="project-link" href="#" aria-label="Open project link" rel="noopener" target="_blank">
+              <h3>ARMouse</h3>
+              <a class="project-link" href="https://github.com/vasu-sutariya/ARMouse" aria-label="Open project link" rel="noopener" target="_blank">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3z"/>
                   <path d="M5 5h6v2H7v10h10v-4h2v6H5V5z"/>
@@ -154,20 +147,20 @@
               </a>
             </div>
             <ul class="project-bullets">
-              <li>Autonomous navigation system for mobile robots</li>
-              <li>Path planning and obstacle avoidance</li>
-              <li>Real-time mapping capabilities</li>
+              <li>Smartphone as a 3D controller for Robot</li>
+              <li>AR tracking combined with IMU usingKalman-filter</li>
+              <li>Intigrated with URalight</li>
             </ul>
-            <img class="project-thumb" src="images/uralight-demo.gif" alt="Robot Navigator demo" loading="lazy">
+            <img class="project-thumb" src="images/ARMouse.gif" alt="Drone Controller demo" loading="lazy">
             <ul>
-              <li>ROS2</li>
-              <li>SLAM</li>
-              <li>Python</li>
+              <li>ARCore</li>
+              <li>Unity</li>
+              <li>Kalman Filter</li>
             </ul>
           </article>
           <article class="project">
             <div class="project-title">
-              <h3>DRONE CONTROLLER</h3>
+              <h3>Mobile Maipulator training in Nvidia Isaac Sim</h3>
               <a class="project-link" href="#" aria-label="Open project link" rel="noopener" target="_blank">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3z"/>
@@ -176,15 +169,15 @@
               </a>
             </div>
             <ul class="project-bullets">
-              <li>Flight control system for autonomous drones</li>
-              <li>Mission planning and GPS navigation</li>
-              <li>Real-time telemetry monitoring</li>
+              <li>Mobile Manipulator training in NVidia Isaac Sim</li>
+              <li>Kinematic and Dynamic modeling</li>
+              <li>Reinforcement Learning</li>
             </ul>
-            <img class="project-thumb" src="images/uralight-demo.gif" alt="Drone Controller demo" loading="lazy">
+            <img class="project-thumb" src="images/uralight-demo.gif" alt="Robot Navigator demo" loading="lazy">
             <ul>
-              <li>Arduino</li>
-              <li>MAVLink</li>
-              <li>C++</li>
+              <li>NVidia Isaac Sim</li>
+              <li>Kinematic and Dynamic modeling</li>
+              <li>Reinforcement Learning</li>
             </ul>
           </article>
         </div>
@@ -193,10 +186,11 @@
       <section id="academic-projects" class="section">
         <h2>Academic Projects</h2>
         <div class="projects">
+          
           <article class="project">
             <div class="project-title">
-              <h3>Tele-operated 4-DOF Manipulator</h3>
-              <a class="project-link" href="https://youtu.be/OflsJSTHff8" aria-label="Open project link" rel="noopener" target="_blank">
+              <h3>Manufacturing Process Automation - AIRBUS</h3>
+              <a class="project-link" href="#" aria-label="Open project link" rel="noopener" target="_blank">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3z"/>
                   <path d="M5 5h6v2H7v10h10v-4h2v6H5V5z"/>
@@ -204,16 +198,66 @@
               </a>
             </div>
             <ul class="project-bullets">
-              <li>ESP32 based tele-operated manipulator</li>
-              <li>3D printed controller</li>
+              <li>My thesis project in collaboration with Airbus to automate a specific manufacturing process at their Broughton facility</li>
+              <li>Mobile manipulator with Coustom made end-effector with A novel design of the tool changer</li> 
+              <li>Also, built a software to control and monitor the Process</li>
             </ul>
-            <img class="project-thumb" src="images/TELE.gif" alt="URALIGHT demo animation" loading="lazy">
+            <img class="project-thumb" src="images/airbus.png" alt="URALIGHT demo animation" loading="lazy">
             <ul>
-              <li>ESP32</li>
-              <li>Arduino</li>
-              <li>Manipulator Kinematics</li>
+              <li>Process Automation</li>
+              <li>Unity</li>
+              <li>MiR 100 · UR16e</li>
             </ul>
           </article>
+
+
+          <article class="project">
+            <div class="project-title">
+              <h3>Multi Robot Path Planning With Dynamic Obstacles - BOW</h3>
+              <a class="project-link" href="https://github.com/vasu-sutariya/Multi-Robot-Path-Planning-With-Dynamic-Obstacles/tree/main" aria-label="Open project link" rel="noopener" target="_blank">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3z"/>
+                  <path d="M5 5h6v2H7v10h10v-4h2v6H5V5z"/>
+                </svg>
+              </a>
+            </div>
+            <ul class="project-bullets">
+              <li>Compared sample based (RRT,RRT* and RRT*FN) and grid based (weighted A*) path planning algorithms</li>
+              <li>Wokred with multi-functional team, integrated with vision based dynamic obstacle detection</li>
+              <li>Tested on UR10e and UR3</li>
+            </ul>
+            <img class="project-thumb" src="images/BOW.gif" alt="URALIGHT demo animation" loading="lazy">
+            <ul>
+              <li>ROS2 · Humble</li>
+              <li>Path Planning</li>
+              <li>Universal Robots</li>
+            </ul>
+          </article>
+
+
+          <article class="project">
+            <div class="project-title">
+              <h3>Multi configuration support flight controller</h3>
+              <a class="project-link" href="https://youtu.be/twnw92eltrY" aria-label="Open project link" rel="noopener" target="_blank">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3z"/>
+                  <path d="M5 5h6v2H7v10h10v-4h2v6H5V5z"/>
+                </svg>
+              </a>
+            </div>
+            <ul class="project-bullets">
+              <li>Arduino based filght controller with PID control</li>
+              <li>Teensy 4.0 microcontroller and MPU 6050 IMU</li>
+              <li>Tested with Hex and Quadcopterwith + and X configuration</li>
+            </ul>
+            <img class="project-thumb" src="images/FC.gif" alt="URALIGHT demo animation" loading="lazy">
+            <ul>
+              <li>PID Tuning</li>
+              <li>Arduino</li>
+            </ul>
+          </article>
+
+
           <article class="project">
             <div class="project-title">
               <h3>Flight control of Hybrid VTOL UAV</h3>
@@ -236,28 +280,8 @@
               <li>Arduino</li>
             </ul>
           </article>
-          <article class="project">
-            <div class="project-title">
-              <h3>Multi Robot Path Planning With Dynamic Obstacles</h3>
-              <a class="project-link" href="https://github.com/vasu-sutariya/Multi-Robot-Path-Planning-With-Dynamic-Obstacles/tree/main" aria-label="Open project link" rel="noopener" target="_blank">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3z"/>
-                  <path d="M5 5h6v2H7v10h10v-4h2v6H5V5z"/>
-                </svg>
-              </a>
-            </div>
-            <ul class="project-bullets">
-              <li>Compared sample based (RRT,RRT* and RRT*FN) and grid based (weighted A*) path planning algorithms</li>
-              <li>Wokred with multi-functional team, integrated with vision based dynamic obstacle detection</li>
-              <li>Tested on UR10e and UR3</li>
-            </ul>
-            <img class="project-thumb" src="images/BOW.gif" alt="URALIGHT demo animation" loading="lazy">
-            <ul>
-              <li>ROS2 · Humble</li>
-              <li>Path Planning</li>
-              <li>Universal Robots</li>
-            </ul>
-          </article>
+
+
           <article class="project">
             <div class="project-title">
               <h3>Wire Arc Additive Manufacturing</h3>
@@ -278,6 +302,53 @@
               <li>Fusion 360</li>
               <li>Additive Manufacturing</li>
               <li>Arc Welding</li>
+            </ul>
+          </article>
+
+          <article class="project">
+            <div class="project-title">
+              <h3>Emergency Delivery Drone</h3>
+              <a class="project-link" href="https://youtu.be/GxqYSyCf8AE" aria-label="Open project link" rel="noopener" target="_blank">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3z"/>
+                  <path d="M5 5h6v2H7v10h10v-4h2v6H5V5z"/>
+                </svg>
+              </a>
+            </div>
+            <ul class="project-bullets">
+              <li>Autonoumous flight on pre-planned path in mission planner</li>
+              <li>Built a relase mechanism to drop the package</li>
+              <li>Tested with various payloads</li>
+            </ul>
+            <img class="project-thumb" src="images/Delivery.gif" alt="URALIGHT demo animation" loading="lazy">
+            <ul>
+              <li>Mission Planner</li>
+            </ul>
+          </article>
+
+
+          
+
+
+          <article class="project">
+            <div class="project-title">
+              <h3>Tele-operated 4-DOF Manipulator</h3>
+              <a class="project-link" href="https://youtu.be/OflsJSTHff8" aria-label="Open project link" rel="noopener" target="_blank">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3z"/>
+                  <path d="M5 5h6v2H7v10h10v-4h2v6H5V5z"/>
+                </svg>
+              </a>
+            </div>
+            <ul class="project-bullets">
+              <li>ESP32 based tele-operated manipulator</li>
+              <li>3D printed controller</li>
+            </ul>
+            <img class="project-thumb" src="images/TELE.gif" alt="URALIGHT demo animation" loading="lazy">
+            <ul>
+              <li>ESP32</li>
+              <li>Arduino</li>
+              <li>Manipulator Kinematics</li>
             </ul>
           </article>
         </div>
