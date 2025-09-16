@@ -1,4 +1,6 @@
-<img src="robot-icon.svg" width="128" height="128" alt="Robot Icon" style="display: block; margin: 0 auto;">
+<div align="center">
+  <img src="robot-icon.svg" width="128" height="128" alt="Robot Icon">
+</div>
 <h2 align="center">Interactive Robotics Portfolio</h2>
 
 An interactive, robotics‑themed portfolio site featuring a canvas‑rendered robot guide that performs real‑time A* path planning, follows your cursor/touch, and avoids obstacles ( from the live DOM layout ). 
